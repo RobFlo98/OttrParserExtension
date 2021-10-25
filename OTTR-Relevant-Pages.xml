@@ -1,0 +1,1726 @@
+<mediawiki xmlns="http://www.mediawiki.org/xml/export-0.10/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mediawiki.org/xml/export-0.10/ http://www.mediawiki.org/xml/export-0.10.xsd" version="0.10" xml:lang="en">
+  <siteinfo>
+    <sitename>DiProMag</sitename>
+    <dbname>smw</dbname>
+    <base>https://dipromag.techfak.uni-bielefeld.de/w/index.php/Main_Page</base>
+    <generator>MediaWiki 1.34.2</generator>
+    <case>first-letter</case>
+    <namespaces>
+      <namespace key="-2" case="first-letter">Media</namespace>
+      <namespace key="-1" case="first-letter">Special</namespace>
+      <namespace key="0" case="first-letter" />
+      <namespace key="1" case="first-letter">Talk</namespace>
+      <namespace key="2" case="first-letter">User</namespace>
+      <namespace key="3" case="first-letter">User talk</namespace>
+      <namespace key="4" case="first-letter">DiProMag</namespace>
+      <namespace key="5" case="first-letter">DiProMag talk</namespace>
+      <namespace key="6" case="first-letter">File</namespace>
+      <namespace key="7" case="first-letter">File talk</namespace>
+      <namespace key="8" case="first-letter">MediaWiki</namespace>
+      <namespace key="9" case="first-letter">MediaWiki talk</namespace>
+      <namespace key="10" case="first-letter">Template</namespace>
+      <namespace key="11" case="first-letter">Template talk</namespace>
+      <namespace key="12" case="first-letter">Help</namespace>
+      <namespace key="13" case="first-letter">Help talk</namespace>
+      <namespace key="14" case="first-letter">Category</namespace>
+      <namespace key="15" case="first-letter">Category talk</namespace>
+      <namespace key="102" case="first-letter">Property</namespace>
+      <namespace key="103" case="first-letter">Property talk</namespace>
+      <namespace key="106" case="first-letter">Form</namespace>
+      <namespace key="107" case="first-letter">Form talk</namespace>
+      <namespace key="108" case="first-letter">Concept</namespace>
+      <namespace key="109" case="first-letter">Concept talk</namespace>
+      <namespace key="112" case="first-letter">smw/schema</namespace>
+      <namespace key="113" case="first-letter">smw/schema talk</namespace>
+      <namespace key="114" case="first-letter">Rule</namespace>
+      <namespace key="115" case="first-letter">Rule talk</namespace>
+      <namespace key="3000" case="first-letter">Dpm</namespace>
+    </namespaces>
+  </siteinfo>
+  <page>
+    <title>Ottr:Documentation</title>
+    <ns>0</ns>
+    <id>453</id>
+    <revision>
+      <id>3202</id>
+      <parentid>3201</parentid>
+      <timestamp>2021-10-16T09:34:17Z</timestamp>
+      <contributor>
+        <username>Florian Schröder</username>
+        <id>23</id>
+      </contributor>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+      <text xml:space="preserve" bytes="46578">This extension provides a parsing of [https://ottr.xyz/ OTTR] statements and a suitable generation of wikicode that implements an equivalent behavior for such statement in the mediawiki. E.g., produce RDF triples based on semantic grouped templates for a consistent and simple instantiation of triple based information.
+
+== In a Nutshell ==
+With OTTR you can define and instantiate templates with a defined syntax with additional features for parameters/arguments and also Lists of terms and different literal types handled by the parser. Main part is the template definition and the instantiation. A very simple example is shown in this section. The next section shows a more complex example that shows more of the features of the OTTR-language inside the pizza ontology.
+
+Write a template (on a page in the Template-Namespace and use the page name as the template name).
+For example a template for employees, that calls another template for persons and add some relationships to the id of the person, that contain information about the occupation, could be part of the page ''ex:Employee'' in the template namespace:
+&lt;pre&gt;
+&amp;lt;ottr&amp;gt;
+ex:Employee[?id, ?name, ?occupation, ?salary, ?birthdate, ?address] :: {
+   ex:person(?id, ?name, ?birthdate, ?adress),
+   ottr:Triple(?id, ex:has_salary, ?salary),
+   ottr:Triple(?id, ex:has_qualification, ?occupation),
+   ottr:Triple(?id, ex:employed_by, ex:this_company)
+}.
+&amp;lt;/ottr&amp;gt;
+&lt;/pre&gt;
+Parameters can have different options (see the example in the next section), the variable names can be used inside the template hull. They have to start with a question mark. There you can call other templates for a complex hierarchy of template instantiation. The Base of template hierarchies are "Base-Templates" that produce the final data on the page. Here it is ottr:Triple.
+
+Instantiate templates on ''normal'' pages, so that it produces triple instances on that page:
+&lt;pre&gt;
+&amp;lt;ottr&amp;gt;
+ex:Employee(ex:emp_003, "John Doe", job:personnel_manager, 3000, "1-1-1965"^xsd:date, "Any Street - Any City - Any State 12345").
+ex:Employee(ex:emp_001, "Jane Doe", job:ceo, 4000, "31-12-1964"^xsd:date, "Any Street - Any City - Any State 12345").
+&amp;lt;/ottr&amp;gt;
+&lt;/pre&gt;
+Besides the normal literal syntax of the turtle and rdf grammar, the OTTR-syntax provides an easier literal definition for numbers (integers and floats) and booleans. Inside the subobjects they are written like normal string literals with a type hint.
+
+The OTTR-language does only provide argument passing via position and not via name.
+
+The extension generates for every triple a subobject from the SMW Extension that contains the subject, predicate and object.
+&lt;pre&gt;
+{{#subobject: |subject={{{1}}} |predicate={{{2}}} |object={{{3}}} |subobject-category=OTTR-Triple }}
+&lt;/pre&gt;
+
+== Overview Example ==
+Templates instantiate other templates. Base templates are the fundament templates, that produces the triples (Here the ottr:Triple template).
+Example from the Pizza ontology [https://ottr.xyz/#Template_definition] :
+
+&lt;pre&gt;
+&amp;lt;ottr&amp;gt;
+ex:NamedPizza[owl:Class ?pizza, ? owl:NamedIndividual ?country, NEList&lt;ottr:IRI&gt; ?toppings = (ex:TomatoSauce)] :: {
+  ax:SubClassOf(?pizza, ex:NamedPizza),
+  ax:SubObjectHasValue(?pizza, ex:hasCountryOfOrigin, ?country),
+  ax:SubObjectAllValuesFrom(?pizza, ex:hasTopping, _:toppingsUnion),
+  rstr:ObjectUnionOf(_:toppingsUnion, ?toppings),
+  cross | ax:SubObjectSomeValuesFrom(?pizza, ex:hasTopping, ++?toppings)
+} .
+&amp;lt;/ottr&amp;gt;
+&lt;/pre&gt;
+This example template from the OTTR-website uses different features (all implemented OTTR features are described in detail in the other sections):
+* '''?''', marking a parameter/argument as optional and so the input can be set to &lt;code&gt;none&lt;/code&gt; or &lt;code&gt;ottr:none&lt;/code&gt;, so that the instances of the templates are executed otherwise the template does not produce any output if arguments (without the parameter option) have the value equal to &lt;code&gt;none&lt;/code&gt;. (Another parameter option in the Non-Blank option '''!''', that is also written in front of the argument name and an optional type restriction).
+* '''_:toppingsUnion''', blank nodes generate new IRIs (references) for every instance of the template without putting an explicit IRI inside the template (Non-Blank parameter option '''!''' throws an error if the value of an argument is a blank node).
+* '''cross |''' ... '''++''', list expand and list expander that handles different list behavior to instantiation of templates and triples with lists as arguments, so that every entry in a list gets an own instance. There is the cross (-product), ZipMin and ZipMax for multiple lists as arguments for an instance, that connects the entries of the different lists different.
+* '''owl:Class''', '''NEList&lt;ottr:IRI&gt;''', type check of the arguments. In this case to IRIs with the type of owl:class and inputs of not empty lists with entries of any IRI look. In the extension this feature is best working for literal types and Lists, but the type interference of the input needs some additional attention by the user.
+* '''= (ex:TomatoSauce)''' default value such that if a &lt;code&gt;none&lt;/code&gt; value is passed the default value is used. (Added inside this example for this documentation)
+
+
+Instantiate Templates, that produce triples on the page.
+&lt;pre&gt;
+&amp;lt;ottr&amp;gt;
+ex:NamedPizza(ex:Margherita, ex:Italy, (ex:Mozzarella, ex:Tomato)) .
+ex:NamedPizza(ex:Hawaii, none, (ex:Cheese, ex:Ham, ex:Pineapple)) .
+&amp;lt;/ottr&amp;gt;
+&lt;/pre&gt;
+Inside a media wiki, that handles such themes it would be, for example, plausible to write the first instance on the ex:Margherita and second on the ex:Hawaii, so that the information is stored on the correlated pages.
+
+==== Sub Templates ====
+A base template can be defined like here [https://primer.ottr.xyz/01-basics.html#5.3_NonBlank_parameters]:
+&lt;pre&gt;&amp;lt;ottr&amp;gt;ottr:Triple [ ottr:IRI ?subject, ! ottr:IRI ?predicate, rdfs:Resource ?object ] :: BASE .&amp;lt;/ottr&amp;gt;&lt;/pre&gt;
+
+Other templates that create rdf(s) relationships like subclasses, etc. Often with a more complex triple call than just one call:
+&lt;pre&gt;
+&amp;lt;ottr&amp;gt;
+ax:SubClassOf[
+    ottr:IRI ?subclass,
+    ottr:IRI ?parentclass
+] :: {
+    ottr:Triple(?subclass, rdfs:subClassOf, ?parentclass)
+} .
+&amp;lt;/ottr&amp;gt;
+&lt;/pre&gt;
+
+== Installation ==
+
+The parser and converter are completely written in python, so the extension needs a working python3 access. In the current 'Hooks' PHP-file it calls a python interpreter of an '''Anaconda''' installation in the &lt;code&gt;extensions&lt;/code&gt; directory and an environment named ''ottr_ext''. Change the call to your needs. Because of the passing of the input to a python call, this extension is in the current form &lt;span style="color:orange"&gt;not considered as secure&lt;/span&gt;. Only trusted users should be allowed to edit pages when the extension is activated.
+The scripts needs the following python library dependencies:
+* [https://pypi.org/project/antlr4-python3-runtime/ ANTLR4] (&lt;code&gt;pip3 install antlr4-python3-runtime&lt;/code&gt;)
+
+Load the extension like other extensions with &lt;code&gt;wfLoadExtension( 'OttrParserExtension' );&lt;/code&gt; in the LocalSettings.php.
+
+The extension transfers some of the code in templates, for this '''you have to import these pages''', from the file in the repository of the extension.
+
+=== Dependencies ===
+MediaWiki Extensions:
+* [https://www.mediawiki.org/wiki/Extension:Semantic_MediaWiki Semantic Media Wiki] ([https://www.semantic-mediawiki.org/wiki/Semantic_MediaWiki Homepage])
+* [https://www.mediawiki.org/wiki/Extension:ParserFunctions ParserFunctions]
+* [https://www.mediawiki.org/wiki/Extension:Loops Loops]
+* [https://www.mediawiki.org/wiki/Extension:Arrays Arrays]
+* [https://www.mediawiki.org/wiki/Extension:Page_Forms Page Forms]
+* [https://www.mediawiki.org/wiki/Extension:InputBox InputBox]
+
+== General Usage of the Extension ==
+Parse and replace OTTR text with wikicode are done via one of the following OTTR calls.
+
+Important is that '''&lt;span style="color:red"&gt;on every page there should only be ONE OTTR call&lt;/span&gt;''' regardless of the variant of the call!
+
+=== Ottr Tag ===
+Generating the wikicode for any OTTR code, the extension provides a html tag, that replaces itself while parsing with the wikicode adding the equivalent functionality.
+
+ &amp;lt;ottr&amp;gt; ... &amp;lt;/ottr&amp;gt;
+
+The advantage of the html tag is the disuse of the pipe character &lt;code&gt;|&lt;/code&gt; and equal sign &lt;code&gt;=&lt;/code&gt; inside the tags (in contrast to the parser function syntax).
+The disadvantage is the loss of the functionality of substitution thus the prevention of repeating extension/python calls.
+
+==== Form attribute ====
+When the attribute form is not empty, the extension does not add the Debug and Display-Wikicode part of the generated code in the output. This is mostly desired in form calls.
+
+ &amp;lt;ottr form=True&amp;gt; ... &amp;lt;/ottr&amp;gt;
+
+=== OTTR Function ===
+For [https://www.mediawiki.org/wiki/Help:Substitution#Multilevel_substitution safe substitution], the extension provides a parser function for templates.
+
+'''Example'''&lt;br/&gt;
+Include something like this in your Template page:
+ &lt;nowiki&gt;{{safesubst:#ottrFunction: ... }}&lt;/nowiki&gt;
+
+The extension writes the safesubst call again in the page, but surrounded with HTML-Comment characters (&lt;code&gt;&amp;lt;!----&amp;gt;&lt;/code&gt;). For recalling the parser delete all the generated code, except the safesubst call.
+
+=== Appearance Options === 
+The extension adds to the generated code some highlighting and hints of the generated data and code. The display behavior of the individual parts can be global turned on and off with a switch from '''0''' to '''1''' and vis versa in the corresponding templates.
+
+===== Template:ottr:DisplayOttr =====
+Display the formulated OTTR call outside the editing mode can be useful on the rendered page. Both for instances and template definitions.
+
+''Example Appearance:''
+&lt;blockquote&gt;
+'''OTTR-Definition:'''
+&lt;pre&gt;
+ ex:Template1 [ ?arg1, ?arg2, ?arg3] :: {
+     ottr:Triple (?arg1, ex:testPredicate, ex:testObject) ,
+     ottr:Triple (ex:testSubject, ?arg2, ex:testObject) ,
+     ottr:Triple (ex:testSubject, ex:testPredicate, ?arg3)
+ } .
+&lt;/pre&gt;
+&lt;/blockquote&gt;
+
+===== Template:ottr:DisplayFormHelp =====
+For easy creating forms and instances, the extension adds a text part to each template, that let the user use them. The default page for a form is the same name as the template, but in the Form namespace. With the InputBox extension a button links to the new page with the automated content that fits to the defined template. If the default page for a form exists, the button disappears and a link to the generated form appears, that expects the name of a page for new instances.
+
+''Example Appearance of a button to create a form page:''
+&lt;blockquote&gt;
+'''Form Info:'''&lt;br/&gt;
+The OTTR-Extension comes with an automated form creation, which simplifies the generation of instances of a template via input fields: 
+&lt;inputbox&gt;
+type=create
+hidden=yes
+default=Main Page
+buttonlabel=Create Form
+&lt;/inputbox&gt;
+&lt;/blockquote&gt;
+
+''Example Appearance of a link to create an instance of the template:''
+
+&lt;blockquote&gt;
+'''Form Info:'''&lt;br/&gt;
+The OTTR-Extension comes with an automated form creation, which simplifies the generation of instances of a template via input fields:
+
+: [[Main Page|Create instance with form]]
+&lt;/blockquote&gt;
+
+===== Template:ottr:DebugOnOFF =====
+The extension provides some (debug) information about generated instances. This includes the ''number of initialised triples'', ''number of different used IRIs'' (an indication of the connectedness of the page), the ''max depth of OTTR-template calls'' and a list of all ''used OTTR-Templates'' and their ''number of calls''.
+
+''Example Appearance:''
+&lt;blockquote&gt;
+'''Debug Info:'''
+* ''Number Init Triples:'' '''3'''
+* ''Number Used IRIs:'' '''6'''
+* ''Max Depth:'' '''2'''
+* ''Used Templates:''
+:- ex:Template1: '''1'''&lt;br/&gt;- ottr:Triple: '''3'''
+&lt;/blockquote&gt;
+
+===== Template:ottr:AllAnnotationsOnOff =====
+The feature annotations from the OTTR-language are relevant for additional information about the template. So the first called template should get called. For ignoring such limitation and call every annotation of all called templates turn this ON. The extension uses the annotation also for specifying layout templates for a template (See [[#Set Layout Template via Annotations|here]]).
+
+===== Template:ottr:DisplayTriplesOnOff =====
+Include an inline ask query about the triples defined on this page. Needs sometimes more refreshes for displaying the table.
+
+''Example Appearance:''
+&lt;blockquote&gt;
+'''Generated Triples:''' ''(Needs sometimes 2x refreshes)''
+&lt;table class="sortable wikitable smwtable jquery-tablesorter"&gt;&lt;tr&gt;&lt;th class="headerSort" tabindex="0" role="columnheader button" title="Sort ascending"&gt;&amp;nbsp;&lt;/th&gt;&lt;th class="Subject headerSort" tabindex="0" role="columnheader button" title="Sort ascending"&gt;&lt;span style="color:#4371cf;"&gt;Subject&lt;/span&gt;&lt;/th&gt;&lt;th class="Predicate headerSort" tabindex="0" role="columnheader button" title="Sort ascending"&gt;&lt;span style="color:#4371cf;"&gt;Predicate&lt;/span&gt;&lt;/th&gt;&lt;th class="Object headerSort" tabindex="0" role="columnheader button" title="Sort ascending"&gt;&lt;span style="color:#4371cf;"&gt;Object&lt;/span&gt;&lt;/th&gt;&lt;/tr&gt;&lt;tr data-row-number="1" class="row-odd"&gt;&lt;td class="smwtype_wpg"&gt;&lt;span class="smw-subobject-entity" style="color:#2a4b8d"&gt;ExampleInstances:Template1&lt;/span&gt;&lt;/td&gt;&lt;td class="Subject smwtype_wpg"&gt;&lt;span style="color:#dd3333;"&gt;Ex:TestPara1&lt;/span&gt;&lt;/td&gt;&lt;td class="Predicate smwtype_wpg"&gt;&lt;span style="color:#dd3333;"&gt;Ex:testPredicate&lt;/span&gt;&lt;/td&gt;&lt;td class="Object smwtype_wpg"&gt;&lt;span style="color:#dd3333;"&gt;Ex:testObject&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr data-row-number="2" class="row-even"&gt;&lt;td class="smwtype_wpg"&gt;&lt;span class="smw-subobject-entity"&gt;&lt;span style="color:#2a4b8d;"&gt;ExampleInstances:Template1&lt;/span&gt;&lt;/td&gt;&lt;td class="Subject smwtype_wpg"&gt;&lt;span style="color:#dd3333;"&gt;Ex:testSubject&lt;/span&gt;&lt;/td&gt;&lt;td class="Predicate smwtype_wpg"&gt;&lt;span style="color:#dd3333;"&gt;Ex:testPredicate&lt;/span&gt;&lt;/td&gt;&lt;td class="Object smwtype_wpg"&gt;&lt;span style="color:#dd3333;"&gt;Ex:TestPara3&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr data-row-number="3" class="row-odd"&gt;&lt;td class="smwtype_wpg"&gt;&lt;span class="smw-subobject-entity" style="color:#2a4b8d"&gt;ExampleInstances:Template1&lt;/span&gt;&lt;/td&gt;&lt;td class="Subject smwtype_wpg"&gt;&lt;span style="color:#dd3333;"&gt;Ex:testSubject&lt;/span&gt;&lt;/td&gt;&lt;td class="Predicate smwtype_wpg"&gt;&lt;span style="color:#dd3333;"&gt;Ex:TestPara2&lt;/span&gt;&lt;/td&gt;&lt;td class="Object smwtype_wpg"&gt;&lt;span style="color:#dd3333;"&gt;Ex:testObject&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/blockquote&gt;
+
+===== Template:ottr:DisplayCode =====
+Display the generated Wikicode for the instances or template on a page.
+
+''Example Appearance:''
+&lt;blockquote&gt;
+'''Wikicode:'''
+&lt;pre&gt;
+{{#ifexpr: {{ottr:DebugOnOFF}}|{{#vardefine:ottr_triple_count|0}}{{#vardefine:ottr_used_iris|}}{{#vardefine:ottr_max_depth|0}}{{#vardefine:ottr_used_templates|}}}}{{ex:Template1|ex:TestPara1|ex:TestPara2|ex:TestPara3|ottr_arg_type_1=ottr:IRI§rdfs:resource|ottr_arg_type_2=ottr:IRI§rdfs:resource|ottr_arg_type_3=ottr:IRI§rdfs:resource|call_occurrence={{FULLPAGENAME}}_0|call_depth=1}}{{#ifexpr: {{ottr:DebugOnOFF}}|&lt;b&gt;Debug Info:&lt;/b&gt;
+* &lt;i&gt;Number Init Triples:&lt;/i&gt; &lt;b&gt;{{#var:ottr_triple_count}}&lt;/b&gt;
+* &lt;i&gt;Number Used IRIs:&lt;/i&gt; &lt;b&gt;{{#arraydefine:ottr_used_iris_set|{{#var: ottr_used_iris}}|,}}{{#arrayunique:ottr_used_iris_set}}{{#arraysize:ottr_used_iris_set}}{{#arrayreset:ottr_used_iris_set}}&lt;/b&gt;
+* &lt;i&gt;Max Depth:&lt;/i&gt; &lt;b&gt;{{#var:ottr_max_depth}}&lt;/b&gt;
+* &lt;i&gt;Used Templates:&lt;/i&gt;
+{{#arraydefine:ottr_used_templates_set|{{#var:ottr_used_templates}}|,}}{{#arrayunique:ottr_used_templates_set}}{{#loop: ottr_used_templates_idx|0|{{#arraysize:ottr_used_templates_set}}|{{#ifexpr: {{#var:ottr_used_templates_idx}}|-|:-}} {{#arrayindex:ottr_used_templates_set|{{#var:ottr_used_templates_idx}}}}:  &lt;b&gt;{{#count:{{#var:ottr_used_templates}}|{{#arrayindex:ottr_used_templates_set|{{#var:ottr_used_templates_idx}}}},}}&lt;/b&gt;&lt;br/&gt;}}{{#arrayreset:ottr_used_templates_set}}
+&lt;nowiki/&gt;
+}}{{#ifexpr: {{ottr:DisplayTriplesOnOff}}|{{ottr:AskForTriples}}}}
+&lt;/pre&gt;
+&lt;/blockquote&gt;
+
+== Prefixes and Comments == 
+The extension uses prefixes from RDFs as namespaces of the wiki, e.g. the page of the IRI &lt;code&gt;xsd:integer&lt;/code&gt; lies in the ''xsd''-namespace.
+Mapping now the prefix to the full IRI is done with a prefix expression, that contains the mapping information from prefix to the expanded URL.
+Because of organizational and clarity reasons, &lt;span style="color:orange"&gt;the extension wants to collect all Prefix information on one page&lt;/span&gt;. So, every occurrence of a prefix definition outside this particular page will give a warning, if the prefix is not defined on the prefix page already.
+
+The default page for all prefixes is '''ottr:ottrPrefixes'''.
+
+===== Syntax =====
+The OTTR-syntax for prefixes is like the one in the turtle language. It starts with &lt;code&gt;@prefix&lt;/code&gt; and states then the prefix and the URL (in &lt;code&gt;&lt;&lt;/code&gt; and &lt;code&gt;&gt;&lt;/code&gt; signs) separated by a colon. It ends (like every OTTR statement) with a dot, e.g.
+&lt;pre&gt;
+@prefix xsd: &lt;http://www.w3.org/2001/XMLSchema#&gt; .
+&lt;/pre&gt;
+
+===== Appearance =====
+The displaying result depends on different preconditions:
+* The statement is on the prefix page:
+&lt;blockquote&gt;
+# Prefix: '''xsd''': &lt;http://www.w3.org/2001/XMLSchema#&gt; 
+&lt;/blockquote&gt;
+* The statement is on another page and the prefix is not defined on the prefix page:
+&lt;blockquote&gt;
+&lt;table class="warning-message" cellspacing="0" cellpadding="0" border="0" style="box-sizing:border-box; border:1px #d33 solid; background: transparent; margin:0.5em 0;padding:0.5em;background-color: #fee7e6"&gt;&lt;tr&gt;&lt;td nowrap="nowrap" valign="top"&gt;'''Warning:''' &lt;/td&gt;&lt;td valign="top"&gt;&amp;emsp;Prefix '''pt2''' is not defined on page [[Main Page|Ottr:OttrPrefixes]]!&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/blockquote&gt;
+* The statement is already on the prefix page:
+&lt;blockquote&gt;
+The prefix statement has no effect and no appearance.
+&lt;/blockquote&gt;
+===== Side Effects =====
+On the Prefix page it produces also a ''subobject'' with the properties:
+; IRI
+: The complete URL without the &lt;code&gt;&lt;&lt;/code&gt; and &lt;code&gt;&gt;&lt;/code&gt;.
+; Namespace
+: The prefix name.
+; Subobject-category
+: &lt;code&gt;OTTR-Prefix&lt;/code&gt;, for querying.
+
+The Warning message produces like every error and warning box also a ''subobject'' of the subobject-category &lt;code&gt;OTTR-Error&lt;/code&gt;, containing the message and a simple error code.
+
+=== Comments ===
+Text declared as a comment is ignored by the parser.
+
+The OTTR-syntax provides single- (&lt;code&gt;# ...&lt;/code&gt;) and multi-line (&lt;code&gt;/*** ... ***/&lt;/code&gt;) comments.
+
+== Template Definition ==
+Writing an OTTR-Template, that can call other OTTR-Templates and produce at the end Triples, is one of the main usage parts of the extension. 
+An OTTR-Template consists of a signature, containing the name of the template and the argument definitions, and the template hull.
+A template can have arguments with different options (parameter modifiers) and also a type restriction per argument is possible. Inside the template hull it states instance calls of other templates. An exception is a base template that maps it three input arguments to a triple representation (''subject'', ''predicate'' and  ''object''). In the OTTR-Language arguments are only passed via their position and not via a name reference, so the names of the arguments are only important for the usage of them inside the template.
+
+&lt;span style="color:orange"&gt;An OTTR-Template must be on a page that is inside the ''Template''-namespace and only one template per page is allowed. Other instances outside the template definition are ignored.&lt;/span&gt;
+
+===== Syntax =====
+The signature of a template consists of the template name (that must be equal to the page name, without the Template-Namspace) and the parameter declaration (arguments in the following). The arguments are inside square brackets &lt;code&gt;[ ]&lt;/code&gt;and are separated by commas &lt;code&gt;,&lt;/code&gt;. The name of the argument starts with a &lt;code&gt;?&lt;/code&gt;. For additional parameter/argument features see the table below.
+The signature and the template hull is connected with double colons &lt;code&gt;::&lt;/code&gt;. The list of template calls inside the hull are surrounded with curly brackets &lt;code&gt;{ }&lt;/code&gt; and separated by commas &lt;code&gt;,&lt;/code&gt;. Only the Base template is declared via the template hull: &lt;code&gt;BASE&lt;/code&gt;. Template calls inside a template are like the instantiation outside a template only with the difference, that there are arguments from a template signature allowed. The statement ends with a dot &lt;code&gt;.&lt;/code&gt;.
+
+An example of a BASE Template and a template with 2 inner template calls:
+&lt;pre&gt;
+ottr:Triple[?subject, ?predicate, ?object] :: BASE .
+&lt;/pre&gt;
+&lt;pre&gt;
+ex:Template_1[?arg1, ?arg2, ?arg3] :: {
+  ottr:Triple(?arg1, ex:PredictateTest1, ?arg2),
+  ottr:Triple(?arg1, ex:PredictateTest2, ?arg3)
+} .
+&lt;/pre&gt;
+
+===== Appearance =====
+Apart from warnings, errors and OTTR display hints and information, a template definition does not produce any visible text. Display the input variables or other stuff use Layout Annotations, see [[#Set Layout Template via Annotations|here]]
+
+===== Side Effects =====
+The extension inserts wiki code such that a call from the template page with another OTTR statement produce the from the template declared triples and other template calls. It should check modifiers and restrictions and the execution of the inner template definition should depend on the result of the checks.
+
+==== Signature Features ====
+{| class="wikitable"
+!OTTR-Feature
+!Description
+!Example Code
+|-
+| Optional Argument
+| A template can accept arguments with a ''none''-value, if the argument is declared as optional with an extra question mark &lt;code&gt;?&lt;/code&gt;. A template will then instantiate its template calls. If an argument gets passed a ''none''-value without the optional modifier the template will produce no template calls and '''no warnings or errors'''. 
+
+The parameter options (optional and non blank) are before the template name and before a type restriction. An argument can have both, an optional and a non blank modifier.
+| &lt;pre&gt;ex:Template[? ?arg1, ?arg2, ? xsd:integer ?arg3]&lt;/pre&gt; The first and third arguments are optional, the second not. The third has also a type restriction.
+|-
+| Default Value
+| In the case, that the argument is none, the template can declare a default value that is used instead. It should be consistent with the  type restriction. It's written with an equal sign &lt;code&gt;=&lt;/code&gt; that separated the argument name and the default value.
+| &lt;pre&gt;ex:Template[? ?arg1, ?arg2 = ex:info, ? xsd:integer ?arg3 = 0]&lt;/pre&gt; The second and third parameter/argument have a default value (the IRI ''&lt;code&gt;ex:info&lt;/code&gt;'' and the number ''&lt;code&gt;0&lt;/code&gt;''). In the implementation an optional modifier is not needed for a default value.
+|-
+| Non Blank Argument
+| A template cannot accept arguments that are blank nodes for different parameters, this is done with the non-blank modifier. It is an exclamation mark &lt;code&gt;!&lt;/code&gt;. In contrast to the optional modifier, it produces an '''error''' if a blank node is passed to the template and does not produce its template instantiations. 
+| &lt;pre&gt;ex:Template[?! ?arg1, ! ?arg2, ? xsd:integer ?arg3]&lt;/pre&gt; The first argument is declared as non-blank and optional. The second has only the non-blank modifier.
+|-
+| Type Restriction
+| Restricting an input to a specific type is done via a type restriction between parameter modifiers and the argument name. It is possible to check an argument for simple type match of OTTR inputs, including check for string (rdfliteral), numbers (integers and floats), boolean and IRIs. Also, a check the nested Lists is possible. A type declaration of a rdfliteral/string (via &lt;code&gt;^^&lt;/code&gt;) is also checked. For inferencing an IRI relationship of a rdfs:SubClassOf and rdf:type is more complex and only produce warnings (this includes a LUB (least upper bound) check), see [[#Type Inferencing|Type Inferencing]] for establishing such relationship inside the wiki.
+
+&lt;span id="OTTR-Type-To-IRI"&gt;The IRIs for the different simple types are:&lt;/span&gt;
+* '''integer''': &lt;code&gt;xsd:integer&lt;/code&gt; (''it also gets the additional types &lt;code&gt;xsd:float&lt;/code&gt; and &lt;code&gt;rdfs:resource&lt;/code&gt;)
+* '''float''': &lt;code&gt;xsd:float&lt;/code&gt; (''it also gets the additional type &lt;code&gt;rdfs:resource&lt;/code&gt;)
+* '''boolean''': &lt;code&gt;xsd:boolean&lt;/code&gt; (''it also gets the additional type &lt;code&gt;rdfs:resource&lt;/code&gt;)
+* '''IRI''': &lt;code&gt;ottr:IRI&lt;/code&gt; (''it also gets the additional type &lt;code&gt;rdfs:resource&lt;/code&gt;)
+
+Request a '''List''' or nested lists the OTTR-syntax provides the &lt;code&gt;List&lt;/code&gt; word with the requested type of the elements of the list inside &lt;code&gt;&lt; &gt;&lt;/code&gt;. Also request '''Not-Empty Lists''' with &lt;code&gt;NEList&lt;/code&gt;
+
+And also, the '''LUB''' restriction, such that the input has to be a direct instance of a type without nested subclass behavior.
+| &lt;pre&gt;ex:Template[?! List&lt;xsd:float&gt; ?arg1, ! ?arg2, ? xsd:integer ?arg3]&lt;/pre&gt; The first argument restricts its input to lists of numbers and the third to integers.
+&lt;pre&gt;ex:Template[?! NEList&lt;xsd:date&gt; ?arg1, ! ?arg2, ottr:IRI ?arg3]&lt;/pre&gt; Here the first argument tries to get a not empty list of dates. Such inputs could be &lt;code&gt;"MyDataInMyDateFormatHere"^^xsd:date&lt;/code&gt;. The template throws an error if the input of the third argument is not an IRI (except if a string has an ''ottr:IRI''-type declaration).^
+|-
+| Annotations
+| With annotations OTTR calls other templates that should not belong to the normal rdf graph. Annotations are added to the signature after the parameter/argument list and are separated with commas &lt;code&gt;,&lt;/code&gt;. Each template annotation call starts with &lt;code&gt;@@&lt;/code&gt;, but otherwise resemble to normal template calls/instantiations. The templates specified inside an annotation are called if the defined template is called not inside a template (so only normal instances).
+
+
+The extension uses annotations for specifying a layout of a template. If the template of an annotation is inside the Layout namespace, this template call is then passed additional arguments, that contain information about the input arguments of the defined template, see [[#Set Layout Template via Annotations|here]] for more information.
+| &lt;pre&gt;ex:Template[?! ?arg1, ! ?arg2, ? xsd:integer ?arg3] 
+@@ex:AnnoTemplate(ex:Template, 2, 3),
+@@ex:AnnoTemplate2(ex:Template, "argument string")
+&lt;/pre&gt; The &lt;code&gt;ex:Template&lt;/code&gt; has two annoations template calls.
+&lt;pre&gt;ex:Template2[?! ?arg1, ! ?arg2, ? xsd:integer ?arg3] 
+@@Layout:MyLayoutTemplate(ex:Template, 2, 3)
+&lt;/pre&gt; The &lt;code&gt;ex:Template2&lt;/code&gt; has an annotation template that lies in the Layout namespace.
+|}
+
+== Instantiation ==
+Instantiation of OTTR-Templates is the other main usage of the OTTR-language.
+A template instantiation is written on a normal page. But the syntax is the same for template calls inside templates and annotations.
+
+===== Syntax =====
+The template name to instantiate and the arguments surrounded by brackets &lt;code&gt;( )&lt;/code&gt;, separated by commas &lt;code&gt;,&lt;/code&gt;, and dot is needed for an instantiation. There are additional features for an instance described below, e.g. lists and list expands, none and blank arguments.
+&lt;pre&gt;
+ex:Template(ex:test, 4, "testString"@en) .
+&lt;/pre&gt;
+
+===== Appearance =====
+Besides debug information, hints and information, instances do not produce visible text by default. Added Layout Templates to a template can show the input of the template.
+
+For instances some type depending on templates can produce some information requests to the user to establish the type dependencies. See [[#Type Inferencing|here]].
+
+===== Side Effects =====
+The idea of instances is to generate the triples from the called templates. So, the results are ''subobjects'' with the subobject-category &lt;code&gt;OTTR-Triple&lt;/code&gt;. If errors or warnings occur also the categories &lt;code&gt;OTTR-Error&lt;/code&gt;.
+&lt;pre&gt;
+{{#subobject: |subject={{{1}}} |predicate={{{2}}} |object={{{3}}} |subobject-category=OTTR-Triple }}
+&lt;/pre&gt;
+
+=== List Features ===
+OTTR comes with the functionality to handle a set of arguments in lists. 
+
+===== Define a List =====
+Defining a list as an argument or as a default value is quite simple. Elements are surrounded by brackets &lt;code&gt;( )&lt;/code&gt; and separated by commas &lt;code&gt;,&lt;/code&gt;. A list can contain any normal input of the underlying position.
+&lt;pre&gt;(1,2,3,4)&lt;/pre&gt;
+&lt;pre&gt;(ex:elem1, ex:elem2, ex:elem3)&lt;/pre&gt;
+&lt;pre&gt;(4, ex:elem3, 5.6, false, "test")&lt;/pre&gt;
+&lt;pre&gt;((1,1),(1,2),(1,3))&lt;/pre&gt;
+
+===== List Expand =====
+To use defined lists in a template, the OTTR-language provides an expand command. In front of a passed list argument, the list expand symbol (two pluses) &lt;code&gt;++&lt;/code&gt; is needed for an expand. Furthermore, a list expander command is needed in front of the instance (separated by a vertical bar/pipe &lt;code&gt;|&lt;/code&gt;). The three different list expander and their behavior are described in the table below. For every element the code produces an independent fold-out of the described template (repeat the template instantiation for each expand). Writing the list expand symbol inside a template hull, in front of an argument name is also valid, if the argument is a list. The empty list is &lt;code&gt;()&lt;/code&gt;.
+&lt;pre&gt;zipMin | ex:Template(++(1,2,3,4), ("a number","a symbol"), ++("one", "two", "three", "four")).&lt;/pre&gt;
+The first and third argument is expanded. The second argument is passed as a normal argument to every instance in the fold-out. This example would produce 4 instances of the &lt;code&gt;ex:Template&lt;/code&gt;-template, e.g. 
+&lt;pre&gt;
+ex:Template(1, ("a number","a symbol"), "one").
+ex:Template(2, ("a number","a symbol"), "two").
+ex:Template(3, ("a number","a symbol"), "three").
+ex:Template(4, ("a number","a symbol"), "four").
+&lt;/pre&gt;
+
+The different list expander only produces different behavior, if there are more than one argument with a list expand symbol.
+{| class="wikitable"
+!List Expander
+!Description
+!Example Code
+|-
+| Cross
+| The cross product between the lists elements. Command: &lt;code&gt;cross&lt;/code&gt;
+| &lt;pre&gt;cross | ex:T(++(1,2,3), ++(10,11)).&lt;/pre&gt; is equivilant to
+&lt;pre&gt;ex:T(1,10).
+ex:T(2,10).
+ex:T(3,10).
+ex:T(1,11).
+ex:T(2,11).
+ex:T(3,11).&lt;/pre&gt;
+|-
+| Zip Min
+| Put all elements in the same position in the lists in a template instance, stop when the smallest list reached its end. Command: &lt;code&gt;zipMin&lt;/code&gt;
+| &lt;pre&gt;zipMin | ex:T(++(1,2,3), ++(10,11)).&lt;/pre&gt; is equivalant to
+&lt;pre&gt;
+ex:T(1,10).
+ex:T(2,11).
+&lt;/pre&gt;
+|-
+| Zip Max
+| Put all elements in the same position in the lists in a template instance, for smaller lists put none instead of list elements, when size is reached. Command: &lt;code&gt;zipMax&lt;/code&gt;
+| &lt;pre&gt;zipMax | ex:T(++(1,2,3), ++(10,11)).&lt;/pre&gt; is equivalant to
+&lt;pre&gt;
+ex:T(1,10).
+ex:T(2,11).
+ex:T(3,none).
+&lt;/pre&gt;
+|}
+
+=== Blank Node ===
+Using an IRI that is in every instance new generated and is not an argument can be a blank node. There are anonymous blank nodes and named blank nodes. Blank nodes with a name can be used in more than one position because it's the same reference name.
+
+===== Syntax =====
+Anonymous blank nodes are two square brackets &lt;code&gt;[]&lt;/code&gt;.
+
+A named blank node is an underscore followed by a colon and then the name, e.g. &lt;code&gt;_:myBlankNodeName&lt;/code&gt;.
+
+===== Appearance =====
+The blank nodes are represented by a name derived from the occurrence call execution path, so they appear inside the ''subobjects'' as a long name of page names and numbers. This is due to the idea, that every blank node should be the same in different refreshes and little changes.
+
+===== Side Effects =====
+The implementation differs from the OTTR description such that &lt;code&gt;?var&lt;/code&gt; and &lt;code&gt;_:var&lt;/code&gt; do not refer to the same object [https://spec.ottr.xyz/stOTTR/0.1/#2.3_Terms].
+As described blank nodes are in this extension pages in the ottr:blank namespace, such that the names of the pages are derived by the execution path (template calls) of an instantiation. Not accepting Blank nodes as an argument can be done with the parameter mode "non-blank" (&lt;code&gt;!&lt;/code&gt;)
+
+=== None Arg ===
+Passing no value to a template means passing the none value. In the current OTTR-version the empty string is not a valid input (even if it is described differently on the website), so pass nothing needs to pass &lt;code&gt;none&lt;/code&gt; or &lt;code&gt;ottr:none&lt;/code&gt;.
+
+===== Syntax =====
+The empty string is not valid. Write &lt;code&gt;none&lt;/code&gt; or &lt;code&gt;ottr:none&lt;/code&gt;.
+
+===== Side Effects =====
+Internal the extension  replaces it by the empty string. A template can behave different to a none input. The template can produce no template calls/instances if there is no ''optional'' parameter mode for the argument or can produce template calls, if it is present. If the argument/parameter has a default fall back constant, it uses this instead (completely ignoring the optional parameter mode).
+
+The none argument is used in the list expander &lt;code&gt;zipMax&lt;/code&gt; for smaller lists.
+
+=== OTTR-Literals ===
+The OTTR-Languages accepts (in contrast to RDFs) different types of literals (and not only strings). These literals are integers (e.g. &lt;code&gt;42&lt;/code&gt;), floats (e.g. &lt;code&gt;3.1415&lt;/code&gt; or &lt;code&gt;0.7e-10&lt;/code&gt;), booleans (&lt;code&gt;true&lt;/code&gt;,&lt;code&gt;false&lt;/code&gt;) and normal strings with language tag or type hints (e.g. "mystring", "good morning"@en, "11-11-2011"@xsd:date).
+The mapping to the used IRIs for the types is described [[#OTTR-Type-To-IRI|here]].
+
+&lt;span style="color:orange"&gt;The extension writes OTTR literals as strings with the type hint in the triple subobjects.&lt;/span&gt;
+
+== Automated Forms ==
+The extension Page Forms provides user friendly forms that request the input of a template via normal input fields. An adequate form to a template needs information about the arguments of the template, like kind of best fitting input field and name. Also, adding relevant information for a qualified completion of a form, is important, because the named input field often do not display the requested input.
+
+Because of the adaption of the template call via the OTTR parser, a form for OTTR-templates need to add additional arguments or call a template that inserts the arguments in an OTTR statement. The second variant is the chosen one in the extension implementation.
+
+The OTTR Extension provides an automated form generation for a written template. It assumes the form for the template should have the same name as the template only in the ''Form''-namespace. On the template page the parser generates a button 'Create Form' for generating such page. It automatically includes the needed code, and the user only has to click 'Create Page'. If the form page exists, the button disappears and a link to create a page with an instance of the form appears. The appearance of the whole ''Form Info'' Part on the template page can be turn off with an adaption of a Template. For a visual example and information see [[#Template:ottr:DisplayFormHelp|above]].
+
+==== Signatures ====
+The OTTR-syntax accept a signature followed by a dot as a valid statement. Because there is no purpose in the mediawiki domain for this feature, the extension uses it to generate the form code for a template that has the same signature.
+
+The derived information from the signature is used to generate the input field code for the different arguments and some information around it. It displays the existence of parameter modes and default values. Also, the requested type is shown. The parameters/arguments are ordered by their position and the name (without the &lt;code&gt;?&lt;/code&gt;) is displayed in front of the corresponding input field.
+
+The different parameter/argument modes are described by:
+* ''"?": optional argument,''
+* ''"!": not a blank node ([] or _:example),''
+* ''"DFLT": default value available''
+
+And are places in front of the input field.
+
+The requested type is written after the input field if it is present in the signature. If a list is requested, the syntax of lists is described.
+
+==== Input Types ====
+Different requested types produce different input types for the input field supported by the page forms extension.
+
+If no type restriction is added to the parameter, the default input form &lt;code&gt;text&lt;/code&gt; is used.
+{| class="wikitable"
+!Requested Type
+!Input Type
+!Description
+|-
+| '''ottr:IRI'''
+| &lt;code&gt;input type=combobox&lt;/code&gt;&lt;code&gt;values from namespace=Main&lt;/code&gt;
+| Suggesting any page of the namespaces, that are written in the Settings.py
+|-
+| '''xsd:integer''' or '''xsd:float'''
+| &lt;code&gt;input type=text&lt;/code&gt;
+| no check for number input is known for the field from the page forms extension
+|-
+| '''xsd:boolean'''
+| &lt;code&gt;input type=dropdown&lt;/code&gt; &lt;code&gt;values=true,false&lt;/code&gt;
+| The values for the OTTR parser that parsed as booleans
+|-
+| '''xsd:string'''
+| &lt;code&gt;input type=textarea&lt;/code&gt;
+| longer text is possible, but the quote marks are fundamental for the OTTR input anyway.
+|-
+| ''Other type''
+| &lt;code&gt;input type=combobox&lt;/code&gt; &lt;code&gt;values from category=&lt;type_value&gt;&lt;/code&gt;
+| Search for pages with the requested type as a category.
+|}
+
+==== Multi Instances ====
+On one page you can add multiple instances with one form call. Simply by clicking on the "Add another instance"-button and filling the input fields.
+
+Internally it satisfies the restriction of only one OTTR parser call per page.
+
+==== Multi Templates ====
+You can also add multiple instances from different templates with one form to a page. This is done by writing multiple signatures in the same OTTR call in the form page (all ending with a dot). In the same order the form will give the user the ability to add instances of any template that correlates to one of the present signatures. The number of different templates depend on how many template pages exists with the name &lt;code&gt;Template:ottr:SingleInstanceForMultiCreationX&lt;/code&gt;, where X starts with 1.
+
+If two or more signatures are present in the OTTR form call, none of them will have an empty instance by default when creating a new page.
+
+==== Drawbacks of Using Forms ====
+Currently it does not display the additional information from the parser to the instances, mainly because of the usage of &amp;lt;noinclude&amp;gt; tags.
+
+==== Default Forms ====
+The template name of the first signature in the form is used to add a default form to the form with the same name and an edit with form link appears on pages that are created with the form.
+
+==== Example ====
+The signature of the namedPizza example from above looks like the following:
+&lt;blockquote&gt;
+[[File:NamedPizzaForm.png|1000px]]
+&lt;/blockquote&gt;
+
+== Implementation Details ==
+The mediawiki representations of the OTTR features are described [[ottr:Feature Representation|here]].
+
+You can change the Error and Warning box appearance by changing the template 'Template:ottr:ErrorMsg', maybe by simple calling a note template or other boxes.
+==== Errors ====
+If an internal unexpected Python Exception occurs the stack trace is printed out on the page.
+
+There are several input errors, that are communicated to the user with a red '''Error''' box.  
+&lt;table class="warning-message" cellspacing="0" cellpadding="0" border="0" style="box-sizing:border-box; border:1px #d33 solid; background: transparent; margin:0.5em 0;padding:0.5em;background-color: #fee7e6"&gt;&lt;tr&gt;&lt;td nowrap="nowrap" valign="top"&gt;'''Error:''' &lt;/td&gt;&lt;td valign="top"&gt;&amp;emsp; ... &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+{| class="wikitable"
+!Trigger
+!Description
+|-
+| Wrong Usage of List expand and List expander
+| Every &lt;code&gt;cross&lt;/code&gt;, &lt;code&gt;ZipMin&lt;/code&gt; and &lt;code&gt;ZipMax&lt;/code&gt; with a pipe &lt;code&gt;|&lt;/code&gt; needs at list one argument in the instantiation code with a list expander sign &lt;code&gt;++&lt;/code&gt;. And &lt;code&gt;++&lt;/code&gt; cannot exist without one of them.
+|-
+| Wrong Usage of variables/arguments
+| Variables as arguments are only allowed inside a template and not outside in a normal instance.
+|-
+| Input Type does not match with simple type check
+| The check to the list nesting of the input, ottr:IRI or the literal type string added by the OTTR parser does not match and so the input is not valid
+|-
+| Non Blank Check Failed
+| Detected a ottr:blank in the type string, but the parameter is marked as a non blank argument and so connecting it to a blank node is not valid.
+|-
+| Used Argument name is not defined in the signature
+| The parameter name used in the template hull does not match with any argument name in the signature. Maybe a typo.
+|-
+| Parser Error
+| The input does not fit to the general syntax rules, described by the language. All other errors above are handled outside the defined syntax because they are not part of it.
+|}
+
+==== Warnings ====
+There are several warnings, that are communicated to the user with a red '''Warning''' box.
+&lt;table class="warning-message" cellspacing="0" cellpadding="0" border="0" style="box-sizing:border-box; border:1px #d33 solid; background: transparent; margin:0.5em 0;padding:0.5em;background-color: #fee7e6"&gt;&lt;tr&gt;&lt;td nowrap="nowrap" valign="top"&gt;'''Warning:''' &lt;/td&gt;&lt;td valign="top"&gt;&amp;emsp; ... &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+{| class="wikitable"
+!Trigger
+!Description
+|-
+| Instances outside a template definition
+| In a template call (for template definition) there should only be the template definition and no other instances outside the template definition per page and call.
+|-
+| More than one template definition
+| In a template call for template definitions there should only be only one template definition per page and call. (A template correlates with a page inside a template namespace).
+|-
+| Template Name and Page name does not match
+| For valid automated form generation, the template name specified in the template definition should match the page name of the used page. Also, the instantiation uses the wiki feature by instantiate the template via the page name.
+|-
+| Template definition does not lie in the Template namespace
+| For using the template correctly, the page should lie in the template namespace (the FULLPAGENAME should start with 'Template:')
+|-
+| Non Empty List Check Failure
+| Type Check for NEList was not successful. Maybe also done because the type of an empty list is not matchable with the type string of NEList&lt;...&gt;
+|-
+| Least Upper Bound Check Failure
+| The check for the LUB&lt;...&gt; was not successful. 
+|-
+| Type Check with Inferencing Failure
+| A type check with the category feature inferencing was not successful, maybe because the input does not fit the requirements or the user does not added the types to the reference.
+|}
+
+==== Type Inferencing ====
+Type checks added via type hint to strings and the types of parsed literals are done without the category feature (inside the extension code). Also the ottr:IRI check is also done and the List and NEList check.
+
+The inferencing of types is currently not a feature of the semantic media wiki. The category inferencing comes close to the subClassOf feature and type relation. But to establish this connection to the different IRIs is not done via a simple wikicode on arbitrary pages. It needs the &lt;code&gt;&lt;nowiki&gt;[[Category:XYZ]]&lt;/nowiki&gt;&lt;/code&gt; on the page equal to the IRI or the Category equal to the Class name. If these pages are not the current page the extension writes the code on, it displays the user a request to add text to these pages. If the pages are not created, it displays a button that fills the edit page of a new page with the needed content. The wikicode for such behavior is written in the following templates:
+* [[Template:ax:SubClassOf]]
+* [[Template:ax:Type]]
+
+So, it is recommended to use these templates, if the type restriction in other templates is necessarily.
+
+The LUB type check checks if the written Category on the page is equal to the requested type (so it tries to not use the inferencing) (See [https://spec.ottr.xyz/mOTTR/0.1/#2.1_Types] 5th paragraph).
+
+===== Task for the user =====
+Before all checks the templates has code for checking, if the needed Code is already on such pages or not (by ask queries of the smw extension)
+====== Type ======
+The type relation is established by put the Category declaration on the normal page of the IRI inside the wiki. If the instance page name is equal to the IRI, the ax:Type template writes the Category silently. If not, it displays an instruction or a button for an easy creation of the page with the Category declaration per preload inside the edit field.
+* Page does exist (tt:TypeTest1), but is not the current page:
+&lt;blockquote&gt;
+''For correct type checking add on page'' '''&lt;span style="color:blue"&gt;tt:TypeTest1&lt;/span&gt;''': &lt;code&gt;&lt;nowiki&gt;[[Category:tt:testClass1]]&lt;/nowiki&gt;&lt;/code&gt;
+&lt;blockquote&gt;
+* Page does not exists:
+&lt;/blockquote&gt;
+&lt;inputbox&gt;
+type=create
+hidden=yes
+default=Main Page
+buttonlabel=Create Page tt:TypeTest1 for correct type checking.
+&lt;/inputbox&gt;
+&lt;/blockquote&gt;
+
+====== SubClassOf ======
+To establish the SubClassOf relation it is necessarily to get the SubCategory relationship, by adding the Category of the SubClass to the Category Page of the "ParentClass":
+* If the Category page of the ParentClass (''tt:testSubClass'') already exists such text occurs:
+&lt;blockquote&gt;
+''Please add'' &lt;code&gt;&lt;nowiki&gt;[[Category:tt:testClass]]&lt;/nowiki&gt;&lt;/code&gt; ''to page'' &lt;span style="color:blue"&gt;Category:tt:testSubClass&lt;/span&gt; ''for correct type checking.''
+&lt;/blockquote&gt;
+* If the Category page does not exist:
+&lt;blockquote&gt;
+&lt;inputbox&gt;
+type=create
+hidden=yes
+default=Main Page
+buttonlabel=Create Category for correct type checking.
+&lt;/inputbox&gt;
+&lt;/blockquote&gt;
+
+==== Set Layout Template via Annotations ====
+If a called annotation template lies in the Layout namespace, the extension adds some other arguments to the called annotation instance, that depend on the arguments of the defined template:
+* &lt;code&gt;ottr_is_anno&lt;/code&gt; with the value '''1'''
+* &lt;code&gt;ottr_number_anno_args&lt;/code&gt; with the value equivalent to the number of arguments of the template.
+
+And for every argument ('''X''' from 1 to &lt;code&gt;ottr_number_anno_args&lt;/code&gt;):
+* &lt;code&gt;ottr_anno_arg_name_'''X'''&lt;/code&gt; the name of the Xth parameter (defined in the template) with the question mark in front of it.
+* &lt;code&gt;ottr_anno_arg_value_'''X'''&lt;/code&gt; the passed value of the Xth argument.
+* &lt;code&gt;ottr_anno_arg_used_default_'''X'''&lt;/code&gt; 1 or 0 if the default value is used in the instance of the template.
+
+For example, add an annotation with &lt;code&gt;@@Layout:OttrDefaultLayout(ex:mytemplate)&lt;/code&gt; with the template name as the first argument (here ex:mytemplate).
+
+== Ideas for Future Versions ==
+A better type inferencing and type relation saving. Maybe also via subobjects but the hiearchy with the subClassOf relationship is not clear.
+
+== Knwon Problems ==
+The SMW Extension does not accept special characters in the subobject like &lt;code&gt;[ ]&lt;/code&gt;. Do not use them in string literals.</text>
+      <sha1>4dyjrnk01eyowt0rok3t1e83b2y3yom</sha1>
+    </revision>
+  </page>
+  <page>
+    <title>Ottr:Overview</title>
+    <ns>0</ns>
+    <id>486</id>
+    <revision>
+      <id>3150</id>
+      <parentid>3149</parentid>
+      <timestamp>2021-09-21T09:55:46Z</timestamp>
+      <contributor>
+        <username>Florian Schröder</username>
+        <id>23</id>
+      </contributor>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+      <text xml:space="preserve" bytes="2186">Welcome to the OTTR-Overview page from  here you should get all the links to important pages used by the OTTR-Extension.
+
+== Documentation ==
+Further information about the usage of the extension, like parser call and ottr-syntax can be found here: [[Ottr:Documentation]].
+
+Implementation details about single ottr features are described [[Ottr:Feature Representation|here]].
+
+== Defined Prefixes ==
+All prefixes should be defined on one page: [[Ottr:OttrPrefixes]].
+
+== Pages with one or more Errors ==
+You can ask for SMW-Subobjects with the predicate "Subobject-Category" equal to OTTR-Error or look on page: [[Ottr:ErrorPages]]
+
+== All initialised Triples ==
+You can ask for SMW-Subobjects with the predicate "Subobject-Category" equal to OTTR-Triple or look on page: [[Ottr:AllTriples]]
+
+== Appearance Templates ==
+Change the display behavior of different additional parser information to the user, simply by turning them off and on by changing the 1 to a 0 and vis versa.
+* [[Template:ottr:DebugOnOFF]]
+* [[Template:ottr:AllAnnotationsOnOff]]
+* [[Template:ottr:DisplayTriplesOnOff]]
+* [[Template:ottr:DisplayCode]]
+* [[Template:ottr:DisplayOttr]]
+* [[Template:ottr:DisplayFormHelp]] 
+
+== Util Templates == 
+The Extension uses some templates for internal processing, if you want some changes or look into the internal mechanics of the templates, here they are:
+
+* [[Template:ottr:ListType]]
+* [[Template:ottr:Prefix]]
+* [[Template:ottr:PrefixCheck]]
+* [[Template:ottr:ErrorMsg]]
+* [[Template:ottr:AskForTriples]]
+* [[ottr:FormTemplate]]  ''(The preloaded file for the automated form)''
+* [[ottr:SubCategoryTemplate]]  ''(The preloaded file for the autoincluded subcategory)''
+* [[Template:ottr:MultiInstanceCreation]]
+* [[Template:ottr:SingleInstanceForMultiCreation]]
+* [[Template:ottr:SingleInstanceForMultiCreation1]]
+* [[Template:ottr:SingleInstanceForMultiCreation2]]
+* [[Template:ottr:SingleInstanceForMultiCreation3]]
+* [[Template:ottr:SingleInstanceForMultiCreation4]]
+* [[Template:ottr:SingleInstanceForMultiCreation5]]
+* [[Template:Layout:OttrDefaultLayout]]
+
+== Pre Definded OTTR Templates ==
+* [[Template:ottr:Triple]]
+* [[Template:ax:SubClassOf]]
+* [[Template:ax:Type]]</text>
+      <sha1>g2ipnzcxc01codwt2398vbpdf5w05jg</sha1>
+    </revision>
+  </page>
+  <page>
+    <title>Ottr:Feature Representation</title>
+    <ns>0</ns>
+    <id>485</id>
+    <revision>
+      <id>3148</id>
+      <parentid>3147</parentid>
+      <timestamp>2021-09-21T09:55:19Z</timestamp>
+      <contributor>
+        <username>Florian Schröder</username>
+        <id>23</id>
+      </contributor>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+      <text xml:space="preserve" bytes="12412">An Overview of how different OTTR Features are represented in the MediaWiki/Semantic MediaWiki Syntax.
+== Prefix ==
+
+Only writes subobject on a prefix page, not on usual pages. In Template:ottr:Prefix:
+
+&lt;pre&gt;{{#subobject: |iri={{#replace:{{#replace:'&amp;lt;iri&amp;gt;'|&amp;lt;|}}|&amp;gt;|}} |namespace=&amp;lt;namespace&amp;gt;|subobject-category=OTTR-Prefix}}&lt;/pre&gt;
+The namespace is the short version.
+
+Displays on the special page: &amp;gt; 1. Prefix: '''prefix''' : ‘&amp;lt;’iri’&amp;gt;’
+
+On other pages (if the prefix is not on the special page):
+
+&lt;blockquote&gt;Prefix '''prefix''' is not defined on page [[Ottr:Ottr:OttrPrefixes|Ottr:OttrPrefixes]]!
+&lt;/blockquote&gt;
+With the check query:
+
+&lt;pre&gt;{{#if:
+  {{#ask:
+   [[-Has subobject::Ottr:OttrPrefixes]][[namespace::{{{2}}}]] 
+   |?namespace
+   |format=list
+   |link=none
+  }}
+  |
+  |&amp;lt;above_warning_msg&amp;gt;
+}}&lt;/pre&gt;
+== Template Call ==
+
+&lt;pre&gt;{{&amp;lt;template_name&amp;gt;
+  |&amp;lt;arg_1_representation&amp;gt;
+  |...
+  |&amp;lt;arg_N_representation&amp;gt;
+  |ottr_arg_type_1=&amp;lt;type_representation_arg_1&amp;gt;
+  |...
+  |ottr_arg_type_N=&amp;lt;type_representation_arg_N&amp;gt;
+  |call_occurence=&amp;lt;call_occurence&amp;gt;
+  |call_depth={{#expr: {{{call_depth}}} + 1}}
+}}&lt;/pre&gt;
+&lt;code&gt;call_occurence&lt;/code&gt; is first initialised with &lt;code&gt;{{FULLPAGENAME}}_&amp;lt;additional_pos_info&amp;gt;&lt;/code&gt; and call depth with 1.
+
+The &lt;code&gt;ottr_arg_type_X&lt;/code&gt; arguments contain a type string with string elements (separated by '''''§''''') that represent a known type the argument.
+
+=== None Arguments ===
+
+Input arguments &lt;code&gt;none&lt;/code&gt; and &lt;code&gt;ottr:none&lt;/code&gt; are replaced by the empty string and have the type &lt;code&gt;ottr:none&lt;/code&gt;.
+
+== Optional Argument Check ==
+
+If a parameter has the option '''?''', it can be none. All other arguments are checked for not &lt;code&gt;none&lt;/code&gt; with this expression:
+&lt;pre&gt;
+{{#iferror: &lt;inner_optional_check&gt;||&lt;the inner template&gt;}}
+&lt;/pre&gt;
+The inner optional check checks for every not optional argument:
+&lt;pre&gt;
+{{#if: {{{&lt;parameter_position&gt;}}}||&lt;strong class="error"&gt;b&lt;/strong&gt;}}&lt;inner_optional_check&gt;
+&lt;/pre&gt;
+It does not throw an error or warning, because it is a feature of the ottr language to be a silent template instance if an argument is None, but the template is not allowed to generate its own instances under these conditions.
+
+== Default Value ==
+
+All usages of an argument with a default value in a template have the following format (normally &lt;code&gt;{{{%s|}}}&lt;/code&gt;)
+
+&lt;pre&gt;{{#if: {{{&amp;lt;parameter_position&amp;gt;|}}}|{{{&amp;lt;parameter_position&amp;gt;}}}|&amp;lt;default_represenation&amp;gt;}}&lt;/pre&gt;
+== Blank Node Representation ==
+
+&lt;pre&gt;ottr:blank:{{{call_occurrence}}}_BN-&amp;lt;blank_node_name&amp;gt;&lt;/pre&gt;
+The blank node name for an anonymous blank node is a number, that increases for every anonymous blank node in a call. The type representation of a blank_node is &lt;code&gt;ottr:blank&lt;/code&gt;
+
+== Non Blank Argument Check ==
+Check with iferror for error in non blank check and use variable for error msg string:
+&lt;pre&gt;
+{{#iferror: &lt;inner non blank check&gt;|{{ottr:ErrorMsg|{{#var:ottr_arg_non_blankerror_msg}}|code=3}}|&lt;the inner template&gt;}}
+&lt;/pre&gt;
+Find ottr:blank§ in the type representation of the argument, if so then write variable with error msg, else check other arguments.
+&lt;pre&gt;
+{{#if: {{#pos:{{{ottr_arg_type_&lt;parameter_position&gt;|}}}|ottr:blank§}}
+  |{{#vardefine:ottr_arg_non_blankerror_msg|{{#var:ottr_arg_non_blankerror_msg}}Argument %i (%s) is a blank node, but declared as non blank&lt;br/&gt;}}&lt;strong class="error"&gt;b&lt;/strong&gt;
+  |
+}}&lt;inner non blank check&gt;
+&lt;/pre&gt;
+
+== Type Restriction Check ==
+
+There is a difference between a hard check of different ottr (literal and iri) types. If they fail they produce an error, but no triples and other template calls. Inferenced types (by category relations) produce only warnings and do not stop the evaluating of the template.
+
+An ottr:none argument is every type.
+
+=== Simple Type Check ===
+
+&lt;pre&gt;{{#iferror:
+  {{#if: {{{&amp;lt;parameter_position&amp;gt;|}}}
+    |{{#if: {{#pos:{{{ottr_arg_type_&amp;lt;parameter_position&amp;gt;|}}}|&amp;lt;restricted_type_represenation&amp;gt;§}}
+      |
+      |{{#if: {{#pos:{{{ottr_arg_type_%i}}}|xsd:string}}
+        |{{#if: {{#pos:{{{ottr_arg_type_%i|}}}|%s§}}
+          |
+          |&amp;lt;strong class=&amp;quot;error&amp;quot;&amp;gt;b&amp;lt;/strong&amp;gt;
+         }}
+        |&amp;lt;strong class=&amp;quot;error&amp;quot;&amp;gt;b&amp;lt;/strong&amp;gt;
+      }}
+    }}
+  |{{ottr:ErrorMsg|Have not found a (simple) type match of the input '{{{&amp;lt;parameter_position&amp;gt;|}}}' for argument &amp;lt;parameter_position&amp;gt; in template '&amp;lt;template_name&amp;gt;' (&amp;lt;restricted_type_represenation&amp;gt;§ in '{{{ottr_arg_type_&amp;lt;parameter_position&amp;gt;|}}}')|code=4}}
+  |&amp;lt;complex_type_check&amp;gt;
+  }}
+}}&lt;/pre&gt;
+&lt;code&gt;&amp;lt;restricted_type_represenation&amp;gt;&lt;/code&gt; is the reduced type without LUB, NEList is also List and a requested type different to “rdfs:resource”, “xsd:boolean”, “xsd:float”, “xsd:integer” and “xsd:string” is only represented as “ottr:IRI”
+
+=== Complex Type Check ===
+
+Class inheritance in SMW with Categories. For &lt;code&gt;rdfs:type&lt;/code&gt;: On Instance page: &lt;code&gt;[[Category:&amp;lt;class_page&amp;gt;]]&lt;/code&gt;. For &lt;code&gt;rdf:SubClassOf&lt;/code&gt;: On Page &lt;code&gt;Category:&amp;lt;sub_class&amp;gt;&lt;/code&gt;: &lt;code&gt;[[Category:&amp;lt;class&amp;gt;]]&lt;/code&gt;.
+
+If the requested type is not a simple type, a nested (a more complex) type check is added to the simple type check.
+
+The complex check starts with:
+
+&lt;pre&gt;{{#if:{{#pos:{{{ottr_arg_type_&amp;lt;parameter_position&amp;gt;}}}|ottr:IRI}}|&amp;lt;inner_complex_check&amp;gt;}}&lt;/pre&gt;
+(Only arguments with &lt;code&gt;ottr:IRI&lt;/code&gt; inside the type string of an argument, are checked for complex types)
+
+For every List in the requested type the code checks
+
+1. if the requested List is a “Not-Empty-List” with:
+
+&lt;pre&gt;{{#ifexpr: {{#arraysize:&amp;lt;value_ref&amp;gt;}} = 0
+  | {{#if: &amp;lt;value_ref&amp;gt;|{{ottr:ErrorMsg|&amp;lt;error_text&amp;gt;|code=7|type=Warning}}|}}
+  |&amp;lt;inner_complex_check&amp;gt;
+}}&lt;/pre&gt;
+&lt;ol start="2" style="list-style-type: decimal;"&gt;
+&lt;li&gt;Adds a check for every element in the list:&lt;/li&gt;&lt;/ol&gt;
+
+&lt;pre&gt;{{#loop:type_list_test_&amp;lt;restricted_type_represenation&amp;gt;
+  |0
+  |{{#arraysize:&amp;lt;value_ref&amp;gt;}}
+  |&amp;lt;inner_complex_check&amp;gt;
+}}&lt;/pre&gt;
+&lt;ol start="3" style="list-style-type: decimal;"&gt;
+&lt;li&gt;Updates the &lt;code&gt;&amp;lt;value_ref&amp;gt;&lt;/code&gt; to:&lt;/li&gt;&lt;/ol&gt;
+
+&lt;pre&gt;{{#explode:{{#arrayindex:&amp;lt;value_ref&amp;gt;|{{#var:type_list_test_&amp;lt;restricted_type_represenation&amp;gt;}}}}|;|0}}&lt;/pre&gt;
+Last, check, dependent on the existence of a LUB restriction, if the most inner iri is listed (as a page) in the category of the requested type:
+
+* LUB:
+
+&lt;pre&gt;{{#ifeq: {{ottr:checkLUBType|&amp;lt;value_ref&amp;gt;|&amp;lt;target_type&amp;gt;}}|NoMatch|&amp;lt;warningMsg&amp;gt;|}}&lt;/pre&gt;
+* Normal URI:
+
+&lt;pre&gt;{{#ifeq: {{ottr:checkType|&amp;lt;value_ref&amp;gt;|&amp;lt;target_type&amp;gt;}}|NoMatch|&amp;lt;warningMsg&amp;gt;|}}&lt;/pre&gt;
+Where &lt;code&gt;target_type&lt;/code&gt; is the (not replaced by &lt;code&gt;ottr:IRI&lt;/code&gt;) most inner requested type.
+
+The Template '''ottr:checkType''' contains:
+
+&lt;pre&gt; {{#ask:[[category:{{{2}}}]][[{{{1}}}]]|default=nomatch|format=list|link=none|mainlabel=-}}&lt;/pre&gt; 
+and '''ottr:checkLUBType''': 
+&lt;/pre&gt;
+{{#if: {{#pos:{{#ask:[[{{{1|}}}]]|?Category=|link=none|format=list|mainlabel=-}},|Category:{{ucfirst:{{{2|}}}}}}}|found|NoMatch}}&lt;/pre&gt;
+
+=== Some Type Representations ===
+
+The generated type strings for literals (also parsed by the ottr syntax) are:
+
+&lt;pre&gt;
+type_to_type_string = {
+    LiteralType.RDFLIT: "xsd:string§rdfs:resource§",
+    LiteralType.BOOL: "xsd:boolean§rdfs:resource§",
+    LiteralType.INTEGER: "xsd:integer§xsd:float§rdfs:resource§",
+    LiteralType.DECIMAL: "xsd:float§rdfs:resource§",
+}&lt;/pre&gt;
+RDFLIT is the string type. Also Type Hints via &lt;code&gt;&amp;quot;some string text&amp;quot;&amp;quot;^^&amp;lt;typeHint&amp;gt;&lt;/code&gt; are also mapped by the above dictionary, with the keys:
+
+&lt;pre&gt;
+class LiteralType:
+    INTEGER = "xsd:integer"
+    DECIMAL = "xsd:float"
+    BOOL = "xsd:boolean"
+    RDFLIT = "xsd:string"
+&lt;/pre&gt;
+If they are equal.
+
+The type string for an IRI is:
+
+&lt;pre&gt;"ottr:IRI§rdfs:resource§"&lt;/pre&gt;
+The type of a list is calculated by a template (&lt;code&gt;ottr:ListType&lt;/code&gt;) with the content:
+
+&lt;pre&gt;{{#if: {{{1|}}}
+  |{{#arraydefine:mykey|{{{1}}}|,}}
+   {{#arraydefine:incommonarray|{{#explode:{{#arrayindex:mykey|0}}|;|1}}|§}}
+   {{#loop: idx
+     |0
+     |{{#arraysize:mykey}}
+     |{{#arraydefine: i_array|{{#explode:{{#arrayindex:mykey|{{#var:idx}}}}|;|1}}|§}}
+      {{#arrayintersect:incommonarray|incommonarray|i_array}}
+   }}
+   {{#loop: idx
+     |0
+     |{{#arraysize:incommonarray}}
+     |{{#if: {{#arrayindex:incommonarray|{{#var:idx}}}}
+       |List&amp;lt;{{#arrayindex:incommonarray|{{#var:idx}}}}&amp;gt;§
+       |
+     }}
+   }}
+   {{#arrayreset:mykey|incommonarray|i_array}}
+  |
+}}&lt;/pre&gt;
+It calculates the intersection of all types of all elements in a list.
+
+== Lists ==
+
+A list is an array.
+
+The value and the type of an element of a list is separated by &lt;code&gt;;&lt;/code&gt;. Elements in a list are separated by &lt;code&gt;,&lt;/code&gt;.
+
+&lt;pre&gt;{{#arraydefine:&amp;lt;list_key&amp;gt;|&amp;lt;list_repr&amp;gt;|,}}&lt;/pre&gt;
+The list_key is &lt;code&gt;&amp;lt;call_occurence&amp;gt;_listkey_&amp;lt;list_counter&amp;gt;&lt;/code&gt; The type of a list is derived from the types of the elements, with an intersection of all type strings. Every result type is than put into &lt;code&gt;List'&amp;lt;'&amp;lt;type&amp;gt;'&amp;gt;'&lt;/code&gt;
+
+Elements of an array are accessed by &lt;code&gt;{{#arrayindex: &amp;lt;list_key&amp;gt;|{{#var: &amp;lt;loop_index&amp;gt;}} }}&lt;/code&gt; The value of an element with &lt;code&gt;xyz=0&lt;/code&gt; and the type with &lt;code&gt;xyz=1&lt;/code&gt; in &lt;code&gt;{{#explode:&amp;lt;element_repr&amp;gt;|;|xyz}}&lt;/code&gt;
+
+A template call with only one list expand is handled in the following way:
+
+&lt;pre&gt;{{#loop: {{ottr:idx_key|{{{call_occurrence}}}_%i|0}}
+  | 0 
+  | {{#arraysize:&amp;lt;list_key&amp;gt;}}
+  |{{&amp;lt;template_name&amp;gt;&amp;lt;argument_string&amp;gt;}}
+}}&lt;/pre&gt;
+=== Cross ===
+
+For every list a loop. Nesting loops inside &lt;code&gt;%%s&lt;/code&gt;.
+
+&lt;pre&gt;{{#loop:&amp;lt;idx_key&amp;gt; | 0 | {{#arraysize:&amp;lt;list_key&amp;gt;}}|%%s}}&lt;/pre&gt;
+In the template call, put all different idx_keys into the argument positions.
+
+=== ZipMin and ZipMax ===
+
+Min / Max size stored in a variable:
+
+&lt;pre&gt;{{#vardefine:{{ottr:end_var|{{{call_occurrence}}}_&amp;lt;call_position&amp;gt;}}|%s}}&lt;/pre&gt;
+where &lt;code&gt;%s&lt;/code&gt; depends on the number of lists and calculates the min/max array size. See &lt;code&gt;get_min_max_size(array_keys, operator)&lt;/code&gt; in [[includes/OttrToSmwPython/Utils.py|Utils.py]]. Optional in the future: Write extension for calculating min and max.
+
+&lt;pre&gt;{{#loop: {{ottr:idx_key|{{{call_occurrence}}}_&amp;lt;call_position&amp;gt;|0}}
+  | 0 
+  |{{#var:{{ottr:end_var|{{{call_occurrence}}}_&amp;lt;call_position&amp;gt;}}}}
+  |{{&amp;lt;template_name&amp;gt;&amp;lt;argument_string&amp;gt;}}
+}}&lt;/pre&gt;
+== Debug Information ==
+
+All wiki code is inside: &lt;code&gt;{{#ifexpr: {{ottr:DebugOnOFF}}|%s}}&lt;/code&gt;
+
+=== Number Triples ===
+
+Init:
+
+&lt;pre&gt;{{#vardefine:ottr_triple_count|0}}&lt;/pre&gt;
+Inside a BASE template:
+
+&lt;pre&gt;{{#vardefine: ottr_triple_count|{{#expr:{{#var:ottr_triple_count}} + 1}}}}&lt;/pre&gt;
+Display debug info:
+
+&lt;pre&gt;{{#var:ottr_triple_count}}&lt;/pre&gt;
+=== Used IRIs ===
+
+Init:
+
+&lt;pre&gt;{{#vardefine:ottr_used_iris|}}&lt;/pre&gt;
+3x inside a BASE template (for every argument):
+
+&lt;pre&gt;{{#if: {{#pos:{{{ottr_arg_type_&amp;lt;arg_position&amp;gt;|}}}|ottr:IRI§}}|{{#vardefine: ottr_used_iris|{{#var:ottr_used_iris}}{{{&amp;lt;arg_position&amp;gt;|}}},}}}}&lt;/pre&gt;
+Display debug info:
+
+&lt;pre&gt;{{#arraydefine:ottr_used_iris_set|{{#var: ottr_used_iris}}|,}}
+{{#arrayunique:ottr_used_iris_set}}
+{{#arraysize:ottr_used_iris_set}}
+{{#arrayreset:ottr_used_iris_set}}&lt;/pre&gt;
+=== Max Depth ===
+
+Init:
+
+&lt;pre&gt;{{#vardefine:ottr_max_depth|0}}&lt;/pre&gt;
+In every template:
+
+&lt;pre&gt;{{#ifexpr: {{{call_depth}}} &amp;gt; {{#var:ottr_max_depth}}|{{#vardefine:ottr_max_depth|{{{call_depth}}}}}|}}&lt;/pre&gt;
+Display debug info:
+
+&lt;pre&gt;{{#var:ottr_max_depth}}&lt;/pre&gt;
+=== Used Templates ===
+
+Init:
+
+&lt;pre&gt;{{#vardefine:ottr_used_templates|}}&lt;/pre&gt;
+In every template:
+
+&lt;pre&gt;{{#vardefine:ottr_used_templates|{{#var:ottr_used_templates}}&amp;lt;template_name&amp;gt;,}}&lt;/pre&gt;
+Display debug info:
+
+&lt;pre&gt;{{#arraydefine:ottr_used_templates_set|{{#var:ottr_used_templates}}|,}}
+{{#arrayunique:ottr_used_templates_set}}
+{{#loop: ottr_used_templates_idx
+  |0
+  |{{#arraysize:ottr_used_templates_set}}
+  |{{#ifexpr: {{#var:ottr_used_templates_idx}}|-|:-}} {{#arrayindex:ottr_used_templates_set|{{#var:ottr_used_templates_idx}}}}:  &amp;lt;b&amp;gt;{{#count:{{#var:%s}}|{{#arrayindex:ottr_used_templates_set|{{#var:ottr_used_templates_idx}}}},}}&amp;lt;/b&amp;gt;&amp;lt;br/&amp;gt;}}
+{{#arrayreset:ottr_used_templates_set}}&lt;/pre&gt;</text>
+      <sha1>rllsmoszgblby0l0pxpsjjzl0gx7200</sha1>
+    </revision>
+  </page>
+  <page>
+    <title>Ottr:OttrPrefixes</title>
+    <ns>0</ns>
+    <id>284</id>
+    <revision>
+      <id>3170</id>
+      <parentid>3169</parentid>
+      <timestamp>2021-09-21T12:47:46Z</timestamp>
+      <contributor>
+        <username>Florian Schröder</username>
+        <id>23</id>
+      </contributor>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+      <text xml:space="preserve" bytes="532">Put here all your prefixes used in ottr templates.
+
+This Page is {{FULLPAGENAME}} .
+
+&lt;ottr&gt;
+
+@prefix pt: &lt;https://dipromag.techfak.uni-bielefeld.de/w/index.php/pt:&gt; .
+@prefix xsd: &lt;http://www.w3.org/2001/XMLSchema#&gt; .
+@prefix owl: &lt;http://www.w3.org/2002/07/owl#&gt; .
+@prefix rdf: &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#&gt; .
+@prefix rdfs:    &lt;http://www.w3.org/2000/01/rdf-schema#&gt; .
+@prefix dipromag:    &lt;http://tpl.ottr.xyz/dipromag/0.1/&gt; .
+@prefix dpm:    &lt;http://dipromag.techfak.uni-bielefeld.de/dipromag_onto/0.1/&gt; .
+&lt;/ottr&gt;</text>
+      <sha1>77wjdu84pr1ehb0csp3kmyu3afqyfc9</sha1>
+    </revision>
+  </page>
+  <page>
+    <title>Ottr:ErrorPages</title>
+    <ns>0</ns>
+    <id>504</id>
+    <revision>
+      <id>3131</id>
+      <timestamp>2021-09-21T09:15:33Z</timestamp>
+      <contributor>
+        <username>Florian Schröder</username>
+        <id>23</id>
+      </contributor>
+      <comment>Created page with "All errors produced by the OTTR extension and the pages on which they appeared:  {{#ask:  [[subobject-category::OTTR-Error]] |mainlabel=Page with Error |? msg |? code |? type }}"</comment>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+      <text xml:space="preserve" bytes="177">All errors produced by the OTTR extension and the pages on which they appeared:
+
+{{#ask:
+ [[subobject-category::OTTR-Error]]
+|mainlabel=Page with Error
+|? msg
+|? code
+|? type
+}}</text>
+      <sha1>9erbqbwlpadfemthl7wyd5of1qorvwi</sha1>
+    </revision>
+  </page>
+  <page>
+    <title>Ottr:AllTriples</title>
+    <ns>0</ns>
+    <id>505</id>
+    <revision>
+      <id>3133</id>
+      <timestamp>2021-09-21T09:16:42Z</timestamp>
+      <contributor>
+        <username>Florian Schröder</username>
+        <id>23</id>
+      </contributor>
+      <comment>Created page with "All Initlaised Triples:  {{#ask:  [[subobject-category::OTTR-Triple]]  |? subject  |? predicate  |? object  |mainlabel=Source Page }}"</comment>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+      <text xml:space="preserve" bytes="133">All Initlaised Triples:
+
+{{#ask:
+ [[subobject-category::OTTR-Triple]]
+ |? subject
+ |? predicate
+ |? object
+ |mainlabel=Source Page
+}}</text>
+      <sha1>h3m6ufe17woscw504l7os6v9tbkzmpe</sha1>
+    </revision>
+  </page>
+  <page>
+    <title>Template:Ottr:DebugOnOFF</title>
+    <ns>10</ns>
+    <id>312</id>
+    <revision>
+      <id>3099</id>
+      <parentid>3097</parentid>
+      <timestamp>2021-09-21T08:33:32Z</timestamp>
+      <contributor>
+        <username>Florian Schröder</username>
+        <id>23</id>
+      </contributor>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+      <text xml:space="preserve" bytes="90">&lt;includeonly&gt;1&lt;/includeonly&gt;&lt;noinclude&gt; 1 turns 'debug information' on, 0 off.&lt;/noinclude&gt;</text>
+      <sha1>b542sabu3ce77v4r4s0drkg2jd0b132</sha1>
+    </revision>
+  </page>
+  <page>
+    <title>Template:Ottr:AllAnnotationsOnOff</title>
+    <ns>10</ns>
+    <id>317</id>
+    <revision>
+      <id>3100</id>
+      <parentid>3096</parentid>
+      <timestamp>2021-09-21T08:33:40Z</timestamp>
+      <contributor>
+        <username>Florian Schröder</username>
+        <id>23</id>
+      </contributor>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+      <text xml:space="preserve" bytes="116">&lt;includeonly&gt;0&lt;/includeonly&gt;&lt;noinclude&gt; 1 turns 'display all annotation independent of depth' on, 0 off.&lt;/noinclude&gt;</text>
+      <sha1>gk13y9gzqp72uyqclorljq5oddrx4yp</sha1>
+    </revision>
+  </page>
+  <page>
+    <title>Template:Ottr:DisplayTriplesOnOff</title>
+    <ns>10</ns>
+    <id>318</id>
+    <revision>
+      <id>3101</id>
+      <parentid>3098</parentid>
+      <timestamp>2021-09-21T08:33:50Z</timestamp>
+      <contributor>
+        <username>Florian Schröder</username>
+        <id>23</id>
+      </contributor>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+      <text xml:space="preserve" bytes="112">&lt;includeonly&gt;1&lt;/includeonly&gt;&lt;noinclude&gt; 1 turns 'display all Triples generated on a page' on, 0 off.&lt;/noinclude&gt;</text>
+      <sha1>hnugy5hj84rw68rnwvxw7vtn27l0oca</sha1>
+    </revision>
+  </page>
+  <page>
+    <title>Template:Ottr:DisplayCode</title>
+    <ns>10</ns>
+    <id>319</id>
+    <revision>
+      <id>3102</id>
+      <parentid>1657</parentid>
+      <timestamp>2021-09-21T08:34:19Z</timestamp>
+      <contributor>
+        <username>Florian Schröder</username>
+        <id>23</id>
+      </contributor>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+      <text xml:space="preserve" bytes="99">&lt;includeonly&gt;1&lt;/includeonly&gt;&lt;noinclude&gt; 1 turns 'display generated smw code' on, 0 off.&lt;/noinclude&gt;</text>
+      <sha1>tjdfgw6yp4fxwu7ab0yfnpx67bqgkom</sha1>
+    </revision>
+  </page>
+  <page>
+    <title>Template:Ottr:DisplayOttr</title>
+    <ns>10</ns>
+    <id>320</id>
+    <revision>
+      <id>3103</id>
+      <parentid>1660</parentid>
+      <timestamp>2021-09-21T08:34:43Z</timestamp>
+      <contributor>
+        <username>Florian Schröder</username>
+        <id>23</id>
+      </contributor>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+      <text xml:space="preserve" bytes="91">&lt;includeonly&gt;1&lt;/includeonly&gt;&lt;noinclude&gt; 1 turns 'display ottr input' on, 0 off.&lt;/noinclude&gt;</text>
+      <sha1>12awqle6xjewc9ryqwf3r3khfclr4b3</sha1>
+    </revision>
+  </page>
+  <page>
+    <title>Template:Ottr:DisplayFormHelp</title>
+    <ns>10</ns>
+    <id>341</id>
+    <revision>
+      <id>3104</id>
+      <parentid>1993</parentid>
+      <timestamp>2021-09-21T08:35:11Z</timestamp>
+      <contributor>
+        <username>Florian Schröder</username>
+        <id>23</id>
+      </contributor>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+      <text xml:space="preserve" bytes="95">&lt;includeonly&gt;1&lt;/includeonly&gt;&lt;noinclude&gt; 1 turns 'display ottr form help' on, 0 off.&lt;/noinclude&gt;</text>
+      <sha1>j8pbfwu0co07eq86outg2c9k3j3zta5</sha1>
+    </revision>
+  </page>
+  <page>
+    <title>Template:Ottr:ListType</title>
+    <ns>10</ns>
+    <id>269</id>
+    <revision>
+      <id>3168</id>
+      <parentid>3106</parentid>
+      <timestamp>2021-09-21T12:45:21Z</timestamp>
+      <contributor>
+        <username>Florian Schröder</username>
+        <id>23</id>
+      </contributor>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+      <text xml:space="preserve" bytes="608">&lt;noinclude&gt; Produces a list of types of a list depending on the intersection of types of all entries of the list.&lt;/noinclude&gt;&lt;includeonly&gt;{{#if: {{{1|}}}|{{#arraydefine:mykey|{{{1}}}|,}}{{#arraydefine:incommonarray|{{#arrayindex:mykey|0}}|§}}{{#loop: idx|0|{{#arraysize:mykey}}|{{#arraydefine: i_array|{{#arrayindex:mykey|{{#var:idx}}}}|§}}{{#arrayintersect:incommonarray|incommonarray|i_array}}}}{{#loop: idx|0|{{#arraysize:incommonarray}}|{{#if: {{#arrayindex:incommonarray|{{#var:idx}}}}|List&lt;{{#arrayindex:incommonarray|{{#var:idx}}}}&gt;§|}}}}{{#arrayreset:mykey|incommonarray|i_array}}|}}&lt;/includeonly&gt;</text>
+      <sha1>sx1hkmhzjzan07x52iew1x64xm3jw14</sha1>
+    </revision>
+  </page>
+  <page>
+    <title>Template:Ottr:Prefix</title>
+    <ns>10</ns>
+    <id>283</id>
+    <revision>
+      <id>3107</id>
+      <parentid>1438</parentid>
+      <timestamp>2021-09-21T08:38:33Z</timestamp>
+      <contributor>
+        <username>Florian Schröder</username>
+        <id>23</id>
+      </contributor>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+      <text xml:space="preserve" bytes="283">&lt;noinclude&gt; Template for generating and plotting prefixes properly on the page for prefixes..&lt;/noinclude&gt;
+&lt;includeonly&gt;# Prefix: '''{{{2}}}''' :   {{{1}}} {{#subobject: |iri={{#replace:{{#replace:{{{1}}}|&lt;|}}|&gt;|}}|namespace={{{2}}}|subobject-category=OTTR-Prefix}}&lt;br/&gt;&lt;/includeonly&gt;</text>
+      <sha1>fsfid8afyr9axtbcrn84ags053kvryv</sha1>
+    </revision>
+  </page>
+  <page>
+    <title>Template:Ottr:PrefixCheck</title>
+    <ns>10</ns>
+    <id>286</id>
+    <revision>
+      <id>3108</id>
+      <parentid>3088</parentid>
+      <timestamp>2021-09-21T08:38:54Z</timestamp>
+      <contributor>
+        <username>Florian Schröder</username>
+        <id>23</id>
+      </contributor>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+      <text xml:space="preserve" bytes="364">&lt;noinclude&gt; Ask Query, used as a hint for the user if the prefix is already saved on the prefix page or not.&lt;/noinclude&gt;
+&lt;includeonly&gt;
+{{#if:{{#ask: [[-Has subobject::Ottr:OttrPrefixes]][[namespace::{{{2}}}]] |?namespace|format=list|link=none}}||{{ottr:ErrorMsg|Prefix '''{{{2}}}''' is not defined on page Ottr:OttrPrefixes!|code=-4|type=Warning}}}}
+&lt;/includeonly&gt;</text>
+      <sha1>bkqoidw95hk2v1f9kwr68aypd56sioj</sha1>
+    </revision>
+  </page>
+  <page>
+    <title>Template:Ottr:ErrorMsg</title>
+    <ns>10</ns>
+    <id>322</id>
+    <revision>
+      <id>3109</id>
+      <parentid>3092</parentid>
+      <timestamp>2021-09-21T08:39:44Z</timestamp>
+      <contributor>
+        <username>Florian Schröder</username>
+        <id>23</id>
+      </contributor>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+      <text xml:space="preserve" bytes="680">&lt;noinclude&gt; Displays an error box and writes a subobject witht the error information.&lt;/noinclude&gt;&lt;includeonly&gt;&lt;table class="warning-message" cellspacing="0" cellpadding="0" border="0" style="box-sizing:border-box; border:1px #d33 solid; background: transparent; margin:0.5em 0;padding:0.5em;background-color: #fee7e6"&gt;&lt;tr&gt;&lt;td nowrap="nowrap" valign="top"&gt;'''{{{type|Error}}}:''' &lt;/td&gt;&lt;td valign="top"&gt;&amp;emsp;{{{msg|{{{1|}}}}}}&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;br/&gt;{{#subobject: |msg={{#replace:{{#replace:{{{msg|{{{1}}}}}}|&lt;|-:}}|&gt;|:-}} |code={{{code}}}|type={{{type|Error}}} |subobject-category=OTTR-Error}}&lt;/includeonly&gt;&lt;noinclude&gt;Error Box. msg via "msg" argument or first argument&lt;/noinclude&gt;</text>
+      <sha1>5ihnm1ts2d8f0ljmiz6jj3e9wju4lud</sha1>
+    </revision>
+  </page>
+  <page>
+    <title>Template:Ottr:AskForTriples</title>
+    <ns>10</ns>
+    <id>321</id>
+    <revision>
+      <id>3111</id>
+      <parentid>2423</parentid>
+      <timestamp>2021-09-21T08:41:12Z</timestamp>
+      <contributor>
+        <username>Florian Schröder</username>
+        <id>23</id>
+      </contributor>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+      <text xml:space="preserve" bytes="373">&lt;includeonly&gt;'''Generated Triples:''' ''(Needs sometimes 2x refreshes)''&lt;br /&gt;{{#ask: [[-Has subobject::{{FULLPAGENAME}}]][[Subobject-category::OTTR-Triple]] |?subject |?predicate |?object}}&lt;/includeonly&gt;&lt;noinclude&gt; Adds the ask query for all generated triples on this page. Needs a second or third refresh for working properly after generating new ottr triples.&lt;noinclude&gt;</text>
+      <sha1>dnscw2w64r0xjq5j3e42hql4slcyudn</sha1>
+    </revision>
+  </page>
+  <page>
+    <title>Ottr:FormTemplate</title>
+    <ns>0</ns>
+    <id>349</id>
+    <revision>
+      <id>2105</id>
+      <parentid>2077</parentid>
+      <timestamp>2021-08-25T15:57:48Z</timestamp>
+      <contributor>
+        <username>Florian Schröder</username>
+        <id>23</id>
+      </contributor>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+      <text xml:space="preserve" bytes="481">&lt;no&lt;includeonly&gt;&lt;/includeonly&gt;include&gt;
+[[Category:OTTR Template Signature Form]]This is the '''$1''' form.
+To create a page with this form, enter the page name below. 
+If a page with that name already exists, you will be sent to a form to edit that page.{{#forminput:form=$1$3
+&lt;/no&lt;includeonly&gt;&lt;/includeonly&gt;include&gt;
+&lt;include&lt;includeonly&gt;&lt;/includeonly&gt;only&gt;
+&lt;ot&lt;includeonly&gt;&lt;/includeonly&gt;tr form=true&gt;
+$2
+&lt;/ot&lt;includeonly&gt;&lt;/includeonly&gt;tr&gt;
+&lt;/include&lt;includeonly&gt;&lt;/includeonly&gt;only&gt;</text>
+      <sha1>jr6evrp09jo65qqll279c1w2s9ngrwv</sha1>
+    </revision>
+  </page>
+  <page>
+    <title>Ottr:SubCategoryTemplate</title>
+    <ns>0</ns>
+    <id>428</id>
+    <revision>
+      <id>2586</id>
+      <parentid>2584</parentid>
+      <timestamp>2021-09-05T20:19:20Z</timestamp>
+      <contributor>
+        <username>Florian Schröder</username>
+        <id>23</id>
+      </contributor>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+      <text xml:space="preserve" bytes="93">&lt;noinclude&gt;&lt;nowiki&gt;&lt;/noinclude&gt;[[Category:$1]]&lt;noinclude&gt;&lt;/nowiki&gt;&lt;/noinclude&gt;
+Is a $2 of $1.</text>
+      <sha1>asd39mpv2kat1ylq1yd5dkd78wx8w9e</sha1>
+    </revision>
+  </page>
+  <page>
+    <title>Template:Ottr:MultiInstanceCreation</title>
+    <ns>10</ns>
+    <id>379</id>
+    <revision>
+      <id>3117</id>
+      <parentid>3116</parentid>
+      <timestamp>2021-09-21T08:51:19Z</timestamp>
+      <contributor>
+        <username>Florian Schröder</username>
+        <id>23</id>
+      </contributor>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+      <text xml:space="preserve" bytes="331">&lt;noinclude&gt; Template for forms, insert the ottr code as arguments starting with 'template_'. The default_form can be passed via the named argument 'default_form'.&lt;/noinclude&gt;&lt;includeonly&gt;
+{{#tag:ottr|{{#forargs: template_|key|value|{{#var: value}}}}}}
+{{#if: {{{default_form|}}}|{{#default_form:{{{default_form}}}}}}}
+&lt;includeonly&gt;</text>
+      <sha1>mftwiqkp8gr577dj74p0at6qo8sfigu</sha1>
+    </revision>
+  </page>
+  <page>
+    <title>Template:Ottr:SingleInstanceForMultiCreation</title>
+    <ns>10</ns>
+    <id>378</id>
+    <revision>
+      <id>3118</id>
+      <parentid>2195</parentid>
+      <timestamp>2021-09-21T08:52:36Z</timestamp>
+      <contributor>
+        <username>Florian Schröder</username>
+        <id>23</id>
+      </contributor>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+      <text xml:space="preserve" bytes="340">&lt;noinclude&gt; Base Template for all other Template:Ottr:SingleInstanceForMultiCreation pages. They should have the same includeonly code like this page.&lt;/noinclude&gt;&lt;includeonly&gt;{{{template_name}}}({{#loop:ottr_instance_loop|1|{{{number_args}}}|{{#ifexpr:{{#var:ottr_instance_loop}}&gt;1|,}}{{{arg_{{#var:ottr_instance_loop}}}}}}}).&lt;/includeonly&gt;</text>
+      <sha1>8gjbdl4mw1p6vfpyhj68bveo9k8oh6o</sha1>
+    </revision>
+  </page>
+  <page>
+    <title>Template:Ottr:SingleInstanceForMultiCreation1</title>
+    <ns>10</ns>
+    <id>382</id>
+    <revision>
+      <id>2210</id>
+      <parentid>2209</parentid>
+      <timestamp>2021-08-29T10:51:21Z</timestamp>
+      <contributor>
+        <username>Florian Schröder</username>
+        <id>23</id>
+      </contributor>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+      <text xml:space="preserve" bytes="178">&lt;includeonly&gt;{{{template_name}}}({{#loop:ottr_instance_loop|1|{{{number_args}}}|{{#ifexpr:{{#var:ottr_instance_loop}}&gt;1|,}}{{{arg_{{#var:ottr_instance_loop}}}}}}}).&lt;/includeonly&gt;</text>
+      <sha1>d3yoe1d4ywyj7qdyki941oaz3huvxg9</sha1>
+    </revision>
+  </page>
+  <page>
+    <title>Template:Ottr:SingleInstanceForMultiCreation2</title>
+    <ns>10</ns>
+    <id>383</id>
+    <revision>
+      <id>2212</id>
+      <parentid>2211</parentid>
+      <timestamp>2021-08-29T10:51:48Z</timestamp>
+      <contributor>
+        <username>Florian Schröder</username>
+        <id>23</id>
+      </contributor>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+      <text xml:space="preserve" bytes="178">&lt;includeonly&gt;{{{template_name}}}({{#loop:ottr_instance_loop|1|{{{number_args}}}|{{#ifexpr:{{#var:ottr_instance_loop}}&gt;1|,}}{{{arg_{{#var:ottr_instance_loop}}}}}}}).&lt;/includeonly&gt;</text>
+      <sha1>d3yoe1d4ywyj7qdyki941oaz3huvxg9</sha1>
+    </revision>
+  </page>
+  <page>
+    <title>Template:Ottr:SingleInstanceForMultiCreation3</title>
+    <ns>10</ns>
+    <id>481</id>
+    <revision>
+      <id>2860</id>
+      <timestamp>2021-09-13T11:24:48Z</timestamp>
+      <contributor>
+        <username>MoritzBlum</username>
+        <id>4</id>
+      </contributor>
+      <comment>Created page with "&lt;includeonly&gt;{{{template_name}}}({{#loop:ottr_instance_loop|1|{{{number_args}}}|{{#ifexpr:{{#var:ottr_instance_loop}}&gt;1|,}}{{{arg_{{#var:ottr_instance_loop}}}}}}}).&lt;/includeonly&gt;"</comment>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+      <text xml:space="preserve" bytes="178">&lt;includeonly&gt;{{{template_name}}}({{#loop:ottr_instance_loop|1|{{{number_args}}}|{{#ifexpr:{{#var:ottr_instance_loop}}&gt;1|,}}{{{arg_{{#var:ottr_instance_loop}}}}}}}).&lt;/includeonly&gt;</text>
+      <sha1>d3yoe1d4ywyj7qdyki941oaz3huvxg9</sha1>
+    </revision>
+  </page>
+  <page>
+    <title>Template:Ottr:SingleInstanceForMultiCreation4</title>
+    <ns>10</ns>
+    <id>482</id>
+    <revision>
+      <id>2862</id>
+      <timestamp>2021-09-13T11:28:07Z</timestamp>
+      <contributor>
+        <username>MoritzBlum</username>
+        <id>4</id>
+      </contributor>
+      <comment>Created page with "&lt;includeonly&gt;{{{template_name}}}({{#loop:ottr_instance_loop|1|{{{number_args}}}|{{#ifexpr:{{#var:ottr_instance_loop}}&gt;1|,}}{{{arg_{{#var:ottr_instance_loop}}}}}}}).&lt;/includeonly&gt;"</comment>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+      <text xml:space="preserve" bytes="178">&lt;includeonly&gt;{{{template_name}}}({{#loop:ottr_instance_loop|1|{{{number_args}}}|{{#ifexpr:{{#var:ottr_instance_loop}}&gt;1|,}}{{{arg_{{#var:ottr_instance_loop}}}}}}}).&lt;/includeonly&gt;</text>
+      <sha1>d3yoe1d4ywyj7qdyki941oaz3huvxg9</sha1>
+    </revision>
+  </page>
+  <page>
+    <title>Template:Ottr:SingleInstanceForMultiCreation5</title>
+    <ns>10</ns>
+    <id>483</id>
+    <revision>
+      <id>2864</id>
+      <timestamp>2021-09-13T11:31:55Z</timestamp>
+      <contributor>
+        <username>MoritzBlum</username>
+        <id>4</id>
+      </contributor>
+      <comment>Created page with "&lt;includeonly&gt;{{{template_name}}}({{#loop:ottr_instance_loop|1|{{{number_args}}}|{{#ifexpr:{{#var:ottr_instance_loop}}&gt;1|,}}{{{arg_{{#var:ottr_instance_loop}}}}}}}).&lt;/includeonly&gt;"</comment>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+      <text xml:space="preserve" bytes="178">&lt;includeonly&gt;{{{template_name}}}({{#loop:ottr_instance_loop|1|{{{number_args}}}|{{#ifexpr:{{#var:ottr_instance_loop}}&gt;1|,}}{{{arg_{{#var:ottr_instance_loop}}}}}}}).&lt;/includeonly&gt;</text>
+      <sha1>d3yoe1d4ywyj7qdyki941oaz3huvxg9</sha1>
+    </revision>
+  </page>
+  <page>
+    <title>Template:Layout:OttrDefaultLayout</title>
+    <ns>10</ns>
+    <id>502</id>
+    <revision>
+      <id>3056</id>
+      <timestamp>2021-09-20T18:13:46Z</timestamp>
+      <contributor>
+        <username>Florian Schröder</username>
+        <id>23</id>
+      </contributor>
+      <comment>Created page with "&lt;includeonly&gt;{| class="wikitable" !colspan="6"|{{{1|Template}}} |- {{#loop:defaultlayoutloop|1|{{{ottr_number_anno_args|0}}}|&amp;nbsp; {{!}}''{{{ottr_anno_arg_name_{{#var:default..."</comment>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+      <text xml:space="preserve" bytes="758">&lt;includeonly&gt;{| class="wikitable"
+!colspan="6"|{{{1|Template}}}
+|-
+{{#loop:defaultlayoutloop|1|{{{ottr_number_anno_args|0}}}|&amp;nbsp;
+{{!}}''{{{ottr_anno_arg_name_{{#var:defaultlayoutloop}}}}}''
+{{!}}{{{ottr_anno_arg_value_{{#var:defaultlayoutloop}}}}} {{#ifexpr:{{{ottr_anno_arg_used_default_{{#var:defaultlayoutloop}}}}}|&lt;i&gt;(Default)&lt;/i&gt;|}}
+{{!}}-
+}}
+|}&lt;/includeonly&gt;&lt;noinclude&gt;
+A template would generate the following table, if it is added as an annotation with &lt;code&gt;@@Layout:OttrDefaultLayout(ex:mytemplate)&lt;/code&gt; with the template name as the first argument (here ex:mytemplate).
+{| class="wikitable"
+!colspan="6"|First Argument of the Template call (Name of the Template)
+|-
+|''arg name''
+|passed argument ''(is default)''
+|-
+| ...
+| ...
+|}&lt;/noinclude&gt;</text>
+      <sha1>c7u6fyhl9m8m2w63wae6pgvgfvllg4i</sha1>
+    </revision>
+  </page>
+  <page>
+    <title>Template:Ottr:Triple</title>
+    <ns>10</ns>
+    <id>409</id>
+    <revision>
+      <id>3145</id>
+      <parentid>3140</parentid>
+      <timestamp>2021-09-21T09:51:55Z</timestamp>
+      <contributor>
+        <username>Florian Schröder</username>
+        <id>23</id>
+      </contributor>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+      <text xml:space="preserve" bytes="8369">&lt;noinclude&gt;&lt;!--{{safesubst:#ottrFunction:ottr:Triple[?subject, ?predicate, ?object] :: BASE.}}--&gt;{{#ifexpr: {{ottr:DisplayOttr}}|'''OTTR-Definition:'''&lt;br/&gt;&lt;pre&gt;ottr:Triple[?subject, ?predicate, ?object] :: BASE.&lt;/pre&gt;}}&lt;/noinclude&gt;&lt;noinclude&gt;{{#ifeq:{{#pos:{{FULLPAGENAME}}|Template:}}|0|{{#ifeq:{{#sub:{{FULLPAGENAME}}|9}}|Ottr:Triple||{{ottr:ErrorMsg|Template name and Page name should be the same: Ottr:Triple (Template name), &lt;b&gt;{{#sub:{{FULLPAGENAME}}|9}}&lt;/b&gt; (Pagename)|code=-1|type=Warning}}}}|{{ottr:ErrorMsg|Page does &lt;b&gt;NOT&lt;/b&gt; lie in the &lt;b&gt;Template&lt;/b&gt; namespace ({{FULLPAGENAME}})|code=-2|type=Warning}}}} &lt;/noinclude&gt;&lt;noinclude&gt;{{#ifexpr: {{ottr:DisplayFormHelp}}|&lt;b&gt;Form Info:&lt;/b&gt;&lt;br/&gt;The OTTR-Extension comes with an automated form creation, which simplifies the generation of instances of a template via input fields:
+{{#ifexpr: {{exists|Form:ottr:Triple}}|: [[Form:ottr:Triple|Create instance with form]]
+|&lt;inputbox&gt;
+type=create
+preload=ottr:FormTemplate
+hidden=yes
+inline=true
+default=Form:ottr:Triple
+buttonlabel=Create Form
+preloadparams[]=ottr:Triple
+preloadparams[]=ottr:Triple[?subject, ?predicate, ?object].
+preloadparams[]=}}
+&lt;/inputbox&gt;}}|}}&lt;/noinclude&gt;&lt;includeonly&gt;{{#ifexpr: {{ottr:DebugOnOFF}}|{{#vardefine:ottr_used_templates|{{#var:ottr_used_templates}}ottr:Triple,}}{{#ifexpr: {{{call_depth}}} &gt; {{#var:ottr_max_depth}}|{{#vardefine:ottr_max_depth|{{{call_depth}}}}}|}}}}{{#iferror: {{#if: {{{1|}}}||&lt;strong class="error"&gt;b&lt;/strong&gt;}}{{#if: {{{2|}}}||&lt;strong class="error"&gt;b&lt;/strong&gt;}}{{#if: {{{3|}}}||&lt;strong class="error"&gt;b&lt;/strong&gt;}}||{{#iferror: |{{ottr:ErrorMsg|{{#var:ottr_arg_non_blankerror_msg}}|code=3}}|{{#ifexpr: {{ottr:DebugOnOFF}}|{{#vardefine: ottr_triple_count|{{#expr:{{#var:ottr_triple_count}} + 1}}}}}}{{#if: {{#pos:{{{ottr_arg_type_1|}}}|ottr:IRI§}}|{{#vardefine: ottr_used_iris|{{#var:ottr_used_iris}}{{{1|}}},}}}}{{#if: {{#pos:{{{ottr_arg_type_2|}}}|ottr:IRI§}}|{{#vardefine: ottr_used_iris|{{#var:ottr_used_iris}}{{{2|}}},}}}}{{#if: {{#pos:{{{ottr_arg_type_3|}}}|ottr:IRI§}}|{{#vardefine: ottr_used_iris|{{#var:ottr_used_iris}}{{{3|}}},}}}}}}}}{{#if: {{#pos:{{{ottr_arg_type_1|}}}|List&lt;}}|{{#vardefine:triple_var_{{{call_occurrence}}}_1|ottr:blank:{{{call_occurrence}}}_BN-Arg1-b0}}{{#loop:triple_list_{{{call_occurrence}}}_arg1|0|{{#arraysize:{{{1}}}}}|{{#subobject:|subject=ottr:blank:{{{call_occurrence}}}_BN-Arg1-b{{#var:triple_list_{{{call_occurrence}}}_arg1}}|predicate=rdf:first|object={{#explode:{{#arrayindex:{{{1}}}|{{#var:triple_list_{{{call_occurrence}}}_arg1}}}}|;|0}}|subobject-category=OTTR-Triple }}{{#subobject:|subject=ottr:blank:{{{call_occurrence}}}_BN-Arg1-b{{#var:triple_list_{{{call_occurrence}}}_arg1}}|predicate=rdf:rest|object={{#ifexpr:{{#expr:{{#var:triple_list_{{{call_occurrence}}}_arg1}} + 1}} = {{#arraysize:{{{1}}}}}|rdf:nil|ottr:blank:{{{call_occurrence}}}_BN-Arg1-b{{#expr:{{#var:triple_list_{{{call_occurrence}}}_arg1}}+1}}}}|subobject-category=OTTR-Triple }}}}|}}{{#if: {{#pos:{{{ottr_arg_type_3|}}}|List&lt;}}|{{#vardefine:triple_var_{{{call_occurrence}}}_3|ottr:blank:{{{call_occurrence}}}_BN-Arg3-b0}}{{#loop:triple_list_{{{call_occurrence}}}_arg3|0|{{#arraysize:{{{3}}}}}|{{#subobject:|subject=ottr:blank:{{{call_occurrence}}}_BN-Arg3-b{{#var:triple_list_{{{call_occurrence}}}_arg3}}|predicate=rdf:first|object={{#explode:{{#arrayindex:{{{3}}}|{{#var:triple_list_{{{call_occurrence}}}_arg3}}}}|;|0}}|subobject-category=OTTR-Triple }}{{#subobject:|subject=ottr:blank:{{{call_occurrence}}}_BN-Arg3-b{{#var:triple_list_{{{call_occurrence}}}_arg3}}|predicate=rdf:rest|object={{#ifexpr:{{#expr:{{#var:triple_list_{{{call_occurrence}}}_arg3}} + 1}} = {{#arraysize:{{{3}}}}}|rdf:nil|ottr:blank:{{{call_occurrence}}}_BN-Arg3-b{{#expr:{{#var:triple_list_{{{call_occurrence}}}_arg3}}+1}}}}|subobject-category=OTTR-Triple }}}}|}}{{#subobject: |subject={{#if:{{#pos:{{{ottr_arg_type_1|}}}|List&lt;}}|{{#var:triple_var_{{{call_occurrence}}}_1}}|{{{1}}}}} |predicate={{{2}}} |object={{#if:{{#pos:{{{ottr_arg_type_3|}}}|List&lt;}}|{{#var:triple_var_{{{call_occurrence}}}_3}}|{{{3}}}}} |subobject-category=OTTR-Triple }}&lt;/includeonly&gt;&lt;noinclude&gt;[[Category:OTTR_Template]]&lt;/noinclude&gt;
+&lt;noinclude&gt;{{#ifexpr: {{ottr:DisplayCode}}|'''Wikicode:'''&lt;br/&gt;&lt;pre&gt;&amp;lt;noinclude&amp;gt;{{#ifeq:{{#pos:{{FULLPAGENAME}}|Template:}}|0|{{#ifeq:{{#sub:{{FULLPAGENAME}}|9}}|Ottr:Triple||{{ottr:ErrorMsg|Template name and Page name should be the same: Ottr:Triple (Template name), &amp;lt;b&amp;gt;{{#sub:{{FULLPAGENAME}}|9}}&amp;lt;/b&amp;gt; (Pagename)|code=-1|type=Warning}}}}|{{ottr:ErrorMsg|Page does &amp;lt;b&amp;gt;NOT&amp;lt;/b&amp;gt; lie in the &amp;lt;b&amp;gt;Template&amp;lt;/b&amp;gt; namespace ({{FULLPAGENAME}})|code=-2|type=Warning}}}} &amp;lt;/noinclude&amp;gt;&amp;lt;noinclude&amp;gt;{{#ifexpr: {{ottr:DisplayFormHelp}}|&amp;lt;b&amp;gt;Form Info:&amp;lt;/b&amp;gt;&amp;lt;br/&amp;gt;The OTTR-Extension comes with an automated form creation, which simplifies the generation of instances of a template via input fields:
+{{#ifexpr: {{exists|Form:ottr:Triple}}|: [[Form:ottr:Triple|Create instance with form]]
+|&amp;lt;inputbox&amp;gt;
+type=create
+preload=ottr:FormTemplate
+hidden=yes
+inline=true
+default=Form:ottr:Triple
+buttonlabel=Create Form
+preloadparams[]=ottr:Triple
+preloadparams[]=ottr:Triple[?subject, ?predicate, ?object].
+preloadparams[]=}}
+&amp;lt;/inputbox&amp;gt;}}|}}&amp;lt;/noinclude&amp;gt;&amp;lt;includeonly&amp;gt;{{#ifexpr: {{ottr:DebugOnOFF}}|{{#vardefine:ottr_used_templates|{{#var:ottr_used_templates}}ottr:Triple,}}{{#ifexpr: {{{call_depth}}} &amp;gt; {{#var:ottr_max_depth}}|{{#vardefine:ottr_max_depth|{{{call_depth}}}}}|}}}}{{#iferror: {{#if: {{{1|}}}||&amp;lt;strong class=&amp;quot;error&amp;quot;&amp;gt;b&amp;lt;/strong&amp;gt;}}{{#if: {{{2|}}}||&amp;lt;strong class=&amp;quot;error&amp;quot;&amp;gt;b&amp;lt;/strong&amp;gt;}}{{#if: {{{3|}}}||&amp;lt;strong class=&amp;quot;error&amp;quot;&amp;gt;b&amp;lt;/strong&amp;gt;}}||{{#iferror: |{{ottr:ErrorMsg|{{#var:ottr_arg_non_blankerror_msg}}|code=3}}|{{#ifexpr: {{ottr:DebugOnOFF}}|{{#vardefine: ottr_triple_count|{{#expr:{{#var:ottr_triple_count}} + 1}}}}}}{{#if: {{#pos:{{{ottr_arg_type_1|}}}|ottr:IRI§}}|{{#vardefine: ottr_used_iris|{{#var:ottr_used_iris}}{{{1|}}},}}}}{{#if: {{#pos:{{{ottr_arg_type_2|}}}|ottr:IRI§}}|{{#vardefine: ottr_used_iris|{{#var:ottr_used_iris}}{{{2|}}},}}}}{{#if: {{#pos:{{{ottr_arg_type_3|}}}|ottr:IRI§}}|{{#vardefine: ottr_used_iris|{{#var:ottr_used_iris}}{{{3|}}},}}}}}}}}{{#if: {{#pos:{{{ottr_arg_type_1|}}}|List&amp;lt;}}|{{#vardefine:triple_var_{{{call_occurrence}}}_1|ottr:blank:{{{call_occurrence}}}_BN-Arg1-b0}}{{#loop:triple_list_{{{call_occurrence}}}_arg1|0|{{#arraysize:{{{1}}}}}|{{#subobject:|subject=ottr:blank:{{{call_occurrence}}}_BN-Arg1-b{{#var:triple_list_{{{call_occurrence}}}_arg1}}|predicate=rdf:first|object={{#explode:{{#arrayindex:{{{1}}}|{{#var:triple_list_{{{call_occurrence}}}_arg1}}}}|;|0}}|subobject-category=OTTR-Triple }}{{#subobject:|subject=ottr:blank:{{{call_occurrence}}}_BN-Arg1-b{{#var:triple_list_{{{call_occurrence}}}_arg1}}|predicate=rdf:rest|object={{#ifexpr:{{#expr:{{#var:triple_list_{{{call_occurrence}}}_arg1}} + 1}} = {{#arraysize:{{{1}}}}}|rdf:nil|ottr:blank:{{{call_occurrence}}}_BN-Arg1-b{{#expr:{{#var:triple_list_{{{call_occurrence}}}_arg1}}+1}}}}|subobject-category=OTTR-Triple }}}}|}}{{#if: {{#pos:{{{ottr_arg_type_3|}}}|List&amp;lt;}}|{{#vardefine:triple_var_{{{call_occurrence}}}_3|ottr:blank:{{{call_occurrence}}}_BN-Arg3-b0}}{{#loop:triple_list_{{{call_occurrence}}}_arg3|0|{{#arraysize:{{{3}}}}}|{{#subobject:|subject=ottr:blank:{{{call_occurrence}}}_BN-Arg3-b{{#var:triple_list_{{{call_occurrence}}}_arg3}}|predicate=rdf:first|object={{#explode:{{#arrayindex:{{{3}}}|{{#var:triple_list_{{{call_occurrence}}}_arg3}}}}|;|0}}|subobject-category=OTTR-Triple }}{{#subobject:|subject=ottr:blank:{{{call_occurrence}}}_BN-Arg3-b{{#var:triple_list_{{{call_occurrence}}}_arg3}}|predicate=rdf:rest|object={{#ifexpr:{{#expr:{{#var:triple_list_{{{call_occurrence}}}_arg3}} + 1}} = {{#arraysize:{{{3}}}}}|rdf:nil|ottr:blank:{{{call_occurrence}}}_BN-Arg3-b{{#expr:{{#var:triple_list_{{{call_occurrence}}}_arg3}}+1}}}}|subobject-category=OTTR-Triple }}}}|}}{{#subobject: |subject={{#if:{{#pos:{{{ottr_arg_type_1|}}}|List&amp;lt;}}|{{#var:triple_var_{{{call_occurrence}}}_1}}|{{{1}}}}} |predicate={{{2}}} |object={{#if:{{#pos:{{{ottr_arg_type_3|}}}|List&amp;lt;}}|{{#var:triple_var_{{{call_occurrence}}}_3}}|{{{3}}}}} |subobject-category=OTTR-Triple }}&amp;lt;/includeonly&amp;gt;&amp;lt;noinclude&amp;gt;[[Category:OTTR_Template]]&amp;lt;/noinclude&amp;gt;
+&lt;/pre&gt;}}&lt;/noinclude&gt;</text>
+      <sha1>ou8dhktrsj8gzsvnwjt817s6qudn6u2</sha1>
+    </revision>
+  </page>
+  <page>
+    <title>Template:Ax:SubClassOf</title>
+    <ns>10</ns>
+    <id>426</id>
+    <revision>
+      <id>3134</id>
+      <parentid>3119</parentid>
+      <timestamp>2021-09-21T09:18:04Z</timestamp>
+      <contributor>
+        <username>Florian Schröder</username>
+        <id>23</id>
+      </contributor>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+      <text xml:space="preserve" bytes="4553">&lt;noinclude&gt;&lt;!--{{safesubst:#ottrFunction:ax:SubClassOf[?subclass, ?class]::{ottr:Triple(?subclass, rdfs:subClassOf, ?class)}.}}--&gt;{{#ifexpr: {{ottr:DisplayOttr}}|'''OTTR-Definition:'''&lt;br/&gt;&lt;pre&gt;ax:SubClassOf[?subclass, ?class]::{ottr:Triple(?subclass, rdfs:subClassOf, ?class)}.&lt;/pre&gt;}}&lt;/noinclude&gt;&lt;noinclude&gt;{{#ifeq:{{#pos:{{FULLPAGENAME}}|Template:}}|0|{{#ifeq:{{#sub:{{FULLPAGENAME}}|9}}|Ax:SubClassOf||{{ottr:ErrorMsg|Template name and Page name should be the same: Ax:SubClassOf (Template name), &lt;b&gt;{{#sub:{{FULLPAGENAME}}|9}}&lt;/b&gt; (Pagename)|code=-1|type=Warning}}}}|{{ottr:ErrorMsg|Page does &lt;b&gt;NOT&lt;/b&gt; lie in the &lt;b&gt;Template&lt;/b&gt; namespace ({{FULLPAGENAME}})|code=-2|type=Warning}}}} &lt;/noinclude&gt;&lt;noinclude&gt;{{#ifexpr: {{ottr:DisplayFormHelp}}|&lt;b&gt;Form Info:&lt;/b&gt;&lt;br/&gt;The OTTR-Extension comes with an automated form creation, which simplifies the generation of instances of a template via input fields:
+{{#ifexpr: {{exists|Form:ax:SubClassOf}}|: [[Form:ax:SubClassOf|Create instance with form]]
+|&lt;inputbox&gt;
+type=create
+preload=ottr:FormTemplate
+hidden=yes
+inline=true
+default=Form:ax:SubClassOf
+buttonlabel=Create Form
+preloadparams[]=ax:SubClassOf
+preloadparams[]=ax:SubClassOf[?subclass, ?class].
+preloadparams[]=}}
+&lt;/inputbox&gt;}}|}}&lt;/noinclude&gt;&lt;includeonly&gt;{{#ifexpr: {{ottr:DebugOnOFF}}|{{#vardefine:ottr_used_templates|{{#var:ottr_used_templates}}ax:SubClassOf,}}{{#ifexpr: {{{call_depth}}} &gt; {{#var:ottr_max_depth}}|{{#vardefine:ottr_max_depth|{{{call_depth}}}}}|}}}}{{#iferror: {{#if: {{{1|}}}||&lt;strong class="error"&gt;b&lt;/strong&gt;}}{{#if: {{{2|}}}||&lt;strong class="error"&gt;b&lt;/strong&gt;}}||{{#iferror: |{{ottr:ErrorMsg|{{#var:ottr_arg_non_blankerror_msg}}|code=3}}|{{ottr:Triple|{{{1|}}}|rdfs:subClassOf|{{{2|}}}|ottr_arg_type_1={{#if: {{{1|}}}|{{{ottr_arg_type_1}}}|ottr:none}}|ottr_arg_type_2=ottr:IRI§rdfs:resource§|ottr_arg_type_3={{#if: {{{2|}}}|{{{ottr_arg_type_2}}}|ottr:none}}|call_occurrence={{{call_occurrence}}}_0|call_depth={{#expr:{{{call_depth}}}+1}}}}}}}}&lt;/includeonly&gt;&lt;noinclude&gt;[[Category:OTTR_Template]]&lt;/noinclude&gt;
+&lt;noinclude&gt;{{#ifexpr: {{ottr:DisplayCode}}|'''Wikicode:'''&lt;br/&gt;&lt;pre&gt;&amp;lt;noinclude&amp;gt;{{#ifeq:{{#pos:{{FULLPAGENAME}}|Template:}}|0|{{#ifeq:{{#sub:{{FULLPAGENAME}}|9}}|Ax:SubClassOf||{{ottr:ErrorMsg|Template name and Page name should be the same: Ax:SubClassOf (Template name), &amp;lt;b&amp;gt;{{#sub:{{FULLPAGENAME}}|9}}&amp;lt;/b&amp;gt; (Pagename)|code=-1|type=Warning}}}}|{{ottr:ErrorMsg|Page does &amp;lt;b&amp;gt;NOT&amp;lt;/b&amp;gt; lie in the &amp;lt;b&amp;gt;Template&amp;lt;/b&amp;gt; namespace ({{FULLPAGENAME}})|code=-2|type=Warning}}}} &amp;lt;/noinclude&amp;gt;&amp;lt;noinclude&amp;gt;{{#ifexpr: {{ottr:DisplayFormHelp}}|&amp;lt;b&amp;gt;Form Info:&amp;lt;/b&amp;gt;&amp;lt;br/&amp;gt;The OTTR-Extension comes with an automated form creation, which simplifies the generation of instances of a template via input fields:
+{{#ifexpr: {{exists|Form:ax:SubClassOf}}|: [[Form:ax:SubClassOf|Create instance with form]]
+|&amp;lt;inputbox&amp;gt;
+type=create
+preload=ottr:FormTemplate
+hidden=yes
+inline=true
+default=Form:ax:SubClassOf
+buttonlabel=Create Form
+preloadparams[]=ax:SubClassOf
+preloadparams[]=ax:SubClassOf[?subclass, ?class].
+preloadparams[]=}}
+&amp;lt;/inputbox&amp;gt;}}|}}&amp;lt;/noinclude&amp;gt;&amp;lt;includeonly&amp;gt;{{#ifexpr: {{ottr:DebugOnOFF}}|{{#vardefine:ottr_used_templates|{{#var:ottr_used_templates}}ax:SubClassOf,}}{{#ifexpr: {{{call_depth}}} &amp;gt; {{#var:ottr_max_depth}}|{{#vardefine:ottr_max_depth|{{{call_depth}}}}}|}}}}{{#iferror: {{#if: {{{1|}}}||&amp;lt;strong class=&amp;quot;error&amp;quot;&amp;gt;b&amp;lt;/strong&amp;gt;}}{{#if: {{{2|}}}||&amp;lt;strong class=&amp;quot;error&amp;quot;&amp;gt;b&amp;lt;/strong&amp;gt;}}||{{#iferror: |{{ottr:ErrorMsg|{{#var:ottr_arg_non_blankerror_msg}}|code=3}}|{{ottr:Triple|{{{1|}}}|rdfs:subClassOf|{{{2|}}}|ottr_arg_type_1={{#if: {{{1|}}}|{{{ottr_arg_type_1}}}|ottr:none}}|ottr_arg_type_2=ottr:IRI§rdfs:resource§|ottr_arg_type_3={{#if: {{{2|}}}|{{{ottr_arg_type_2}}}|ottr:none}}|call_occurrence={{{call_occurrence}}}_0|call_depth={{#expr:{{{call_depth}}}+1}}}}}}}}&amp;lt;/includeonly&amp;gt;&amp;lt;noinclude&amp;gt;[[Category:OTTR_Template]]&amp;lt;/noinclude&amp;gt;
+&lt;/pre&gt;}}&lt;/noinclude&gt;&lt;includeonly&gt;
+{{#ifeq: {{#ask:[[Subcategory of::{{{2|}}}]]|link=none}}|Category:{{ucfirst:{{{1|}}}}}||{{#ifexpr:{{Exists|Category:{{{1}}}}}|&lt;i&gt;Please add &lt;/i&gt;&lt;code&gt;&lt;nowiki&gt;[[Category:&lt;/nowiki&gt;{{{2}}}]]&lt;/code&gt;&lt;i&gt; to page &lt;/i&gt;[[:Category:{{{1}}}]]&lt;i&gt; for correct type checking.&lt;/i&gt;&lt;br/&gt;&lt;br/&gt;
+|{{#tag:inputbox|
+type=create
+preload=ottr:SubCategoryTemplate
+hidden=yes
+inline=true
+default=Category:{{{1|}}}
+buttonlabel=Create Category for correct type checking.
+preloadparams[]={{{2|}}}
+preloadparams[]= subclass
+}}}}}}&lt;/includeonly&gt;</text>
+      <sha1>ctdpd1ylroufl7i3vllo5p3g0m2d1fz</sha1>
+    </revision>
+  </page>
+  <page>
+    <title>Template:Ax:Type</title>
+    <ns>10</ns>
+    <id>427</id>
+    <revision>
+      <id>3141</id>
+      <parentid>3120</parentid>
+      <timestamp>2021-09-21T09:21:54Z</timestamp>
+      <contributor>
+        <username>Florian Schröder</username>
+        <id>23</id>
+      </contributor>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+      <text xml:space="preserve" bytes="4422">&lt;noinclude&gt;&lt;!--{{safesubst:#ottrFunction:ax:Type[?instance, ?class]::{ottr:Triple(?instance, rdf:type, ?class)}.}}--&gt;{{#ifexpr: {{ottr:DisplayOttr}}|'''OTTR-Definition:'''&lt;br/&gt;&lt;pre&gt;ax:Type[?instance, ?class]::{ottr:Triple(?instance, rdf:type, ?class)}.&lt;/pre&gt;}}&lt;/noinclude&gt;&lt;noinclude&gt;{{#ifeq:{{#pos:{{FULLPAGENAME}}|Template:}}|0|{{#ifeq:{{#sub:{{FULLPAGENAME}}|9}}|Ax:Type||{{ottr:ErrorMsg|Template name and Page name should be the same: Ax:Type (Template name), &lt;b&gt;{{#sub:{{FULLPAGENAME}}|9}}&lt;/b&gt; (Pagename)|code=-1|type=Warning}}}}|{{ottr:ErrorMsg|Page does &lt;b&gt;NOT&lt;/b&gt; lie in the &lt;b&gt;Template&lt;/b&gt; namespace ({{FULLPAGENAME}})|code=-2|type=Warning}}}} &lt;/noinclude&gt;&lt;noinclude&gt;{{#ifexpr: {{ottr:DisplayFormHelp}}|&lt;b&gt;Form Info:&lt;/b&gt;&lt;br/&gt;The OTTR-Extension comes with an automated form creation, which simplifies the generation of instances of a template via input fields:
+{{#ifexpr: {{exists|Form:ax:Type}}|: [[Form:ax:Type|Create instance with form]]
+|&lt;inputbox&gt;
+type=create
+preload=ottr:FormTemplate
+hidden=yes
+inline=true
+default=Form:ax:Type
+buttonlabel=Create Form
+preloadparams[]=ax:Type
+preloadparams[]=ax:Type[?instance, ?class].
+preloadparams[]=}}
+&lt;/inputbox&gt;}}|}}&lt;/noinclude&gt;&lt;includeonly&gt;{{#ifexpr: {{ottr:DebugOnOFF}}|{{#vardefine:ottr_used_templates|{{#var:ottr_used_templates}}ax:Type,}}{{#ifexpr: {{{call_depth}}} &gt; {{#var:ottr_max_depth}}|{{#vardefine:ottr_max_depth|{{{call_depth}}}}}|}}}}{{#iferror: {{#if: {{{1|}}}||&lt;strong class="error"&gt;b&lt;/strong&gt;}}{{#if: {{{2|}}}||&lt;strong class="error"&gt;b&lt;/strong&gt;}}||{{#iferror: |{{ottr:ErrorMsg|{{#var:ottr_arg_non_blankerror_msg}}|code=3}}|{{ottr:Triple|{{{1|}}}|rdf:type|{{{2|}}}|ottr_arg_type_1={{#if: {{{1|}}}|{{{ottr_arg_type_1}}}|ottr:none}}|ottr_arg_type_2=ottr:IRI§rdfs:resource§|ottr_arg_type_3={{#if: {{{2|}}}|{{{ottr_arg_type_2}}}|ottr:none}}|call_occurrence={{{call_occurrence}}}_0|call_depth={{#expr:{{{call_depth}}}+1}}}}}}}}&lt;/includeonly&gt;&lt;noinclude&gt;[[Category:OTTR_Template]]&lt;/noinclude&gt;
+&lt;noinclude&gt;{{#ifexpr: {{ottr:DisplayCode}}|'''Wikicode:'''&lt;br/&gt;&lt;pre&gt;&amp;lt;noinclude&amp;gt;{{#ifeq:{{#pos:{{FULLPAGENAME}}|Template:}}|0|{{#ifeq:{{#sub:{{FULLPAGENAME}}|9}}|Ax:Type||{{ottr:ErrorMsg|Template name and Page name should be the same: Ax:Type (Template name), &amp;lt;b&amp;gt;{{#sub:{{FULLPAGENAME}}|9}}&amp;lt;/b&amp;gt; (Pagename)|code=-1|type=Warning}}}}|{{ottr:ErrorMsg|Page does &amp;lt;b&amp;gt;NOT&amp;lt;/b&amp;gt; lie in the &amp;lt;b&amp;gt;Template&amp;lt;/b&amp;gt; namespace ({{FULLPAGENAME}})|code=-2|type=Warning}}}} &amp;lt;/noinclude&amp;gt;&amp;lt;noinclude&amp;gt;{{#ifexpr: {{ottr:DisplayFormHelp}}|&amp;lt;b&amp;gt;Form Info:&amp;lt;/b&amp;gt;&amp;lt;br/&amp;gt;The OTTR-Extension comes with an automated form creation, which simplifies the generation of instances of a template via input fields:
+{{#ifexpr: {{exists|Form:ax:Type}}|: [[Form:ax:Type|Create instance with form]]
+|&amp;lt;inputbox&amp;gt;
+type=create
+preload=ottr:FormTemplate
+hidden=yes
+inline=true
+default=Form:ax:Type
+buttonlabel=Create Form
+preloadparams[]=ax:Type
+preloadparams[]=ax:Type[?instance, ?class].
+preloadparams[]=}}
+&amp;lt;/inputbox&amp;gt;}}|}}&amp;lt;/noinclude&amp;gt;&amp;lt;includeonly&amp;gt;{{#ifexpr: {{ottr:DebugOnOFF}}|{{#vardefine:ottr_used_templates|{{#var:ottr_used_templates}}ax:Type,}}{{#ifexpr: {{{call_depth}}} &amp;gt; {{#var:ottr_max_depth}}|{{#vardefine:ottr_max_depth|{{{call_depth}}}}}|}}}}{{#iferror: {{#if: {{{1|}}}||&amp;lt;strong class=&amp;quot;error&amp;quot;&amp;gt;b&amp;lt;/strong&amp;gt;}}{{#if: {{{2|}}}||&amp;lt;strong class=&amp;quot;error&amp;quot;&amp;gt;b&amp;lt;/strong&amp;gt;}}||{{#iferror: |{{ottr:ErrorMsg|{{#var:ottr_arg_non_blankerror_msg}}|code=3}}|{{ottr:Triple|{{{1|}}}|rdf:type|{{{2|}}}|ottr_arg_type_1={{#if: {{{1|}}}|{{{ottr_arg_type_1}}}|ottr:none}}|ottr_arg_type_2=ottr:IRI§rdfs:resource§|ottr_arg_type_3={{#if: {{{2|}}}|{{{ottr_arg_type_2}}}|ottr:none}}|call_occurrence={{{call_occurrence}}}_0|call_depth={{#expr:{{{call_depth}}}+1}}}}}}}}&amp;lt;/includeonly&amp;gt;&amp;lt;noinclude&amp;gt;[[Category:OTTR_Template]]&amp;lt;/noinclude&amp;gt;
+&lt;/pre&gt;}}&lt;/noinclude&gt;&lt;includeonly&gt;
+{{#ifeq:{{FULLPAGENAME}}|{{ucfirst:{{{1|}}}}}|[[Category:{{{2|}}}]]|{{#ifeq:{{ottr:checkLUBType|{{{1|}}}|{{{2|}}}}}|NoMatch
+|{{#ifexpr:{{Exists|{{{1|}}}}}|&lt;i&gt;For correct type checking add on page &lt;/i&gt;&lt;b&gt;[[{{{1|}}}]]: &lt;/b&gt;&lt;code&gt;&lt;nowiki&gt;[[Category:&lt;/nowiki&gt;{{{2|}}}]]&lt;/code&gt;&lt;br/&gt;&lt;br/&gt;
+|{{#tag:inputbox|
+type=create
+preload=ottr:SubCategoryTemplate
+hidden=yes
+inline=true
+default={{{1|}}}
+buttonlabel=Create Page {{{1}}} for correct type checking.
+preloadparams[]={{{2|}}}
+preloadparams[]=n instance
+}}}}}}}}&lt;/includeonly&gt;</text>
+      <sha1>800cuwyc3l2cg7i2znjx3i2wv9sji38</sha1>
+    </revision>
+  </page>
+</mediawiki>
