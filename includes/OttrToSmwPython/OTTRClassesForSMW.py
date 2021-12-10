@@ -708,7 +708,7 @@ class Template:
 			# base templates always produce sub object containing the triple
 			smw = self.signature.get_smw_repr(smw_context)
 			debug_smw_init_triples = (smw_context.IF_DEBUG % (smw_context.increase_triple_count()) + smw_context.update_used_iri_triple())
-			smw %= debug_smw_init_triples
+			smw_lists_triple = debug_smw_init_triples
 
 			def get_loop_blank_node(loop, plus_one=False):
 				return "ottr:blank:{{{call_occurrence}}}_BN-Arg%i-b%s" % (loop, ("{{#expr:%s+1}}" if plus_one else "%s") % ("{{#var:triple_list_{{{call_occurrence}}}_arg%i}}" % loop))
@@ -731,9 +731,9 @@ class Template:
 					fst_triple,
 					rest_triple
 				)
-				smw += list_to_turtle
-			smw += "{{#subobject: |subject={{#if:{{#pos:{{{ottr_arg_type_1|}}}|List<}}|{{#var:triple_var_{{{call_occurrence}}}_1}}|{{{1}}}}} |predicate={{{2}}} |object={{#if:{{#pos:{{{ottr_arg_type_3|}}}|List<}}|{{#var:triple_var_{{{call_occurrence}}}_3}}|{{{3}}}}} |subobject-category=OTTR-Triple }}"
-			return smw
+				smw_lists_triple += list_to_turtle
+			smw_lists_triple += "{{#subobject: |subject={{#if:{{#pos:{{{ottr_arg_type_1|}}}|List<}}|{{#var:triple_var_{{{call_occurrence}}}_1}}|{{{1}}}}} |predicate={{{2}}} |object={{#if:{{#pos:{{{ottr_arg_type_3|}}}|List<}}|{{#var:triple_var_{{{call_occurrence}}}_3}}|{{{3}}}}} |subobject-category=OTTR-Triple }}"
+			return smw % smw_lists_triple
 			# smw += "{{#subobject: |subject={{{1}}} |predicate={{{2}}} |object={{{3}}} |subobject-category=OTTR-Triple }}"
 		return ""
 
@@ -863,7 +863,7 @@ class Literal:
 			if self.optional_hint[0] == self.LiteralType.IRI_:
 				opt = f"^^{self.optional_hint[1]}"
 			else:
-				opt = f"@{self.optional_hint[1]}"
+				opt = f"{self.optional_hint[1]}" # @ is included in the text, somehow
 		if self.literal_type == self.LiteralType.RDFLIT:
 			return str(self.value) + opt
 		return '"' + str(self.value) + '"^^' + self.literal_type
