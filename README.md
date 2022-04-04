@@ -7,7 +7,7 @@ More information about the extension: https://www.mediawiki.org/wiki/Extension:O
 The help page for wiki usage: https://www.mediawiki.org/wiki/Help:Extension:OttrParser.
 
 ## Installation
-See Media Wiki page of the extension: [Intsall Instructions](https://www.mediawiki.org/wiki/Extension:OttrParser#Installation).
+See Media Wiki page of the extension: [Install Instructions](https://www.mediawiki.org/wiki/Extension:OttrParser#Installation).
 
 ## Pages as XML
 The [OTTR-Relevant-Pages.xml](OTTR-Relevant-Pages.xml) contains the data for the relevant pages and templates, that are part of the extension. Import them via the Special Page Import. (Special:Import)
