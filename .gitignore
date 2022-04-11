@@ -3,3 +3,5 @@
 /node_modules
 .eslintcache
 .idea
+*pycache*
+ottr_env/
