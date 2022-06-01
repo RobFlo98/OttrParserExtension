@@ -1,8 +1,8 @@
 import textwrap
 
-from OTTRParser import OTTRParser
-from Utils import get_text, DELIMITERS, get_min_max_size, get_prefix_special_page_name, VarNames, get_input_type_of_ottr_type
-from stOTTR.stOTTRParser import stOTTRParser
+from includes.ottrToSmwPython.OTTRParser import OTTRParser
+from includes.ottrToSmwPython.Utils import get_text, DELIMITERS, get_min_max_size, get_prefix_special_page_name, VarNames, get_input_type_of_ottr_type
+from includes.ottrToSmwPython.stOTTR.stOTTRParser import stOTTRParser
 from typing import List
 
 
@@ -777,7 +777,7 @@ class Term:
 
 		self.term_list_smw_key = None
 		self.term_list_type = None
-
+		self.ctx = ctx
 	def set_inner_constant(self, ctx):
 		self.inner_constant_ref = ctx.inner_constant
 
@@ -803,6 +803,7 @@ class Term:
 				)
 				return define_string + array_define_template_call
 			else:
+				#return None
 				return self.inner_constant_ref.define_list(list_pos, smw_context, is_instance)
 		return ""
 

@@ -1,9 +1,9 @@
-from OTTRParser import OTTRParser
-from OTTRClassesForSMW import PrefixID, Parameter, Constant, Type, Signature, Template, Instance, Argument, Term, Annotation, Literal
-from SMWGenerator import SMWGenerator
-from Utils import get_text
-from stOTTR.stOTTRListener import stOTTRListener
-from stOTTR.stOTTRParser import stOTTRParser
+from includes.ottrToSmwPython.OTTRParser import OTTRParser
+from includes.ottrToSmwPython.OTTRClassesForSMW import PrefixID, Parameter, Constant, Type, Signature, Template, Instance, Argument, Term, Annotation, Literal
+from includes.ottrToSmwPython.SMWGenerator import SMWGenerator
+from includes.ottrToSmwPython.Utils import get_text
+from includes.ottrToSmwPython.stOTTR.stOTTRListener import stOTTRListener
+from includes.ottrToSmwPython.stOTTR.stOTTRParser import stOTTRParser
 
 
 class OTTRToSMWConverter(stOTTRListener):
@@ -38,6 +38,7 @@ class OTTRToSMWConverter(stOTTRListener):
 
 	# Exit a parse tree produced by stOTTRParser#stOTTRDoc.
 	def exitStOTTRDoc(self, ctx: stOTTRParser.StOTTRDocContext):
+
 		smw_generator = SMWGenerator(prefixes=self.prefixIds, definitions=self.definition_statements, instances=self.instance_statements)
 		smw_code = smw_generator.produce_smw()
 
@@ -54,8 +55,10 @@ class OTTRToSMWConverter(stOTTRListener):
 
 	# Exit a parse tree produced by stOTTRParser#statement.
 	def exitStatement(self, ctx: stOTTRParser.StatementContext):
+
 		if ctx.instance():
 			self.instance_statements.append(self.instance)
+			#print(self.instance)
 		else:
 			self.definition_statements.append(Template(self.signature, self.patternlist))
 		self.signature = None
@@ -84,6 +87,7 @@ class OTTRToSMWConverter(stOTTRListener):
 	def exitTemplateName(self, ctx: stOTTRParser.TemplateNameContext):
 		self.template_name = self.iri
 		self.iri = None
+		self.args = self.args_list
 
 	# Enter a parse tree produced by stOTTRParser#parameterList.
 	def enterParameterList(self, ctx: stOTTRParser.ParameterListContext):
@@ -169,9 +173,15 @@ class OTTRToSMWConverter(stOTTRListener):
 	# Exit a parse tree produced by stOTTRParser#instance.
 	def exitInstance(self, ctx: stOTTRParser.InstanceContext):
 		if type(self.patternlist) == list:
-			self.patternlist.append(Instance(ctx, self.args_list, self.template_name, pos=len(self.patternlist) + 1, is_instance=False))
+			inst = Instance(ctx, self.args_list, self.template_name, pos=len(self.patternlist) + 1, is_instance=False)
+			for arg in inst.argument_list:
+				#print(arg.term.c)
+				pass
+			self.patternlist.append(inst)
+
 		else:  # if type(ctx.parentCtx) == stOTTRParser.AnnotationContext:
 			is_instance = type(ctx.parentCtx) != stOTTRParser.AnnotationContext
+
 			self.instance = Instance(ctx, self.args_list, self.template_name, len(self.instance_statements) + 1, is_instance=is_instance)
 
 		self.template_name = None
@@ -191,7 +201,9 @@ class OTTRToSMWConverter(stOTTRListener):
 
 	# Exit a parse tree produced by stOTTRParser#argument.
 	def exitArgument(self, ctx: stOTTRParser.ArgumentContext):
+		#print(self.term.ctx.getText())
 		self.args_list.append(Argument(ctx, self.term))
+		#print(len(self.args_list))
 		self.term = None
 
 	# Enter a parse tree produced by stOTTRParser#otype.
@@ -250,6 +262,7 @@ class OTTRToSMWConverter(stOTTRListener):
 	def exitTerm(self, ctx: OTTRParser.TermContext):
 		ctx.term.set_inner_constant(ctx)
 		if type(ctx.parentCtx) == stOTTRParser.ArgumentContext:
+			#print('\n\n', type(ctx.parentCtx), ctx.getText(), '\n\n')
 			self.term = ctx.term
 		elif type(ctx.parentCtx) == stOTTRParser.TermListContext:
 			ctx.parentCtx.term.term_list.append(ctx.term)

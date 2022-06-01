@@ -1,6 +1,6 @@
 from antlr4 import ParserRuleContext, NoViableAltException, RecognitionException
 
-from stOTTR.stOTTRParser import stOTTRParser
+from includes.ottrToSmwPython.stOTTR.stOTTRParser import stOTTRParser
 
 
 class OTTRParser(stOTTRParser):

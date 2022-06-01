@@ -1,9 +1,9 @@
 import sys
 import os.path
-sys.path.append(
-    os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir, os.path.pardir)))
+#sys.path.append(
+#    os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir, os.path.pardir)))
 
-import Settings
+import includes.ottrToSmwPython.Settings
 
 
 def get_text(context):
