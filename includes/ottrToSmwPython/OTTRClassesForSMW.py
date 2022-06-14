@@ -523,11 +523,12 @@ class Signature:
 	If the template has no hull and BASE ref, the signature is used to produce only the wiki code used in a form.
 	"""
 
-	def __init__(self, ctx: stOTTRParser.SignatureContext, template_name: str, parameters: List[Parameter], annotations: List[Annotation]):
+	def __init__(self, ctx: stOTTRParser.SignatureContext, template_name: str, parameters: List[Parameter], annotations: List[Annotation],arguments:List[Argument]):
 		self.parameters = parameters
 		self.annotations = annotations
 		self.template_name = template_name
 		self.source_str = " ".join(ctx.start.source[1].strdata[ctx.start.start:ctx.parameterList().stop.stop + 1].split())
+		self.arguments = arguments
 
 	def get_smw_repr(self, smw_context: SMWContext = None):
 		variable_strings = {}

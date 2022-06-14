@@ -73,8 +73,9 @@ class OTTRToSMWConverter(stOTTRListener):
 
 	# Exit a parse tree produced by stOTTRParser#signature.
 	def exitSignature(self, ctx: stOTTRParser.SignatureContext):
-
-		self.signature = Signature(ctx, self.template_name, self.params, self.annos)
+		#print(self.template_name)
+		#print('ARGSLIST<<<<'+self.args_list+'>>>>>>')
+		self.signature = Signature(ctx, self.template_name, self.params, self.annos,self.args_list)
 		self.params = None
 		self.annos = None
 		self.template_name = None
@@ -105,6 +106,7 @@ class OTTRToSMWConverter(stOTTRListener):
 
 	# Exit a parse tree produced by stOTTRParser#parameter.
 	def exitParameter(self, ctx: stOTTRParser.ParameterContext):
+		#print(self.term)
 		self.params.append(Parameter(ctx, otype=self.otype, pos=len(self.params) + 1, default=self.constant))
 		self.otype = None
 		self.constant = None
@@ -172,10 +174,12 @@ class OTTRToSMWConverter(stOTTRListener):
 
 	# Exit a parse tree produced by stOTTRParser#instance.
 	def exitInstance(self, ctx: stOTTRParser.InstanceContext):
+		#print(self.params)
 		if type(self.patternlist) == list:
+			#print(self.__dict__)
 			inst = Instance(ctx, self.args_list, self.template_name, pos=len(self.patternlist) + 1, is_instance=False)
 			for arg in inst.argument_list:
-				#print(arg.term.c)
+
 				pass
 			self.patternlist.append(inst)
 
@@ -193,6 +197,8 @@ class OTTRToSMWConverter(stOTTRListener):
 
 	# Exit a parse tree produced by stOTTRParser#argumentList.
 	def exitArgumentList(self, ctx: stOTTRParser.ArgumentListContext):
+		#print('here')
+		#print(self.__dict__)
 		pass
 
 	# Enter a parse tree produced by stOTTRParser#argument.
@@ -201,10 +207,12 @@ class OTTRToSMWConverter(stOTTRListener):
 
 	# Exit a parse tree produced by stOTTRParser#argument.
 	def exitArgument(self, ctx: stOTTRParser.ArgumentContext):
-		#print(self.term.ctx.getText())
+
 		self.args_list.append(Argument(ctx, self.term))
+
 		#print(len(self.args_list))
-		self.term = None
+		#print(type(ctx))
+		#self.term = None
 
 	# Enter a parse tree produced by stOTTRParser#otype.
 	def enterOtype(self, ctx: stOTTRParser.OtypeContext):

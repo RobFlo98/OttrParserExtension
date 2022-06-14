@@ -3,18 +3,23 @@ import textwrap
 from includes.ottrToSmwPython.OTTRClassesForSMW import PrefixID, Template, Instance, SMWContext
 from typing import List
 import re
+import json
 
 
 NON_BREAKING_SPACE = "&nbsp;"
 
+
 def debug_print(string):
     print("<pre>" + str(string) + "</pre>")
+
 
 def mediawiki_wrap_in_code(string):
     return f"<code>{string}<\code>"
 
+
 def mediawiki_literal(s):
     return "<pre>" + str(s) + "</pre>"
+
 
 def get_iris_from_wikicode(arglist_wikicode):
     "Get IRIS(?) from wikicode ..."
@@ -39,11 +44,12 @@ def mediawiki_sub_arg(arg):
 
     """
 
-    return "{{{"+arg+"}}}"
+    return "{{{" + arg + "}}}"
 
 
-def mediawiki_wrap_if_calldepht(s,calldepth):
-    return "{{#ifexpr:{{{call_depth|0}}}="+str(calldepth)+"|" + s + "}}"
+def mediawiki_wrap_if_calldepht(s, calldepth):
+    return "{{#ifexpr:{{{call_depth|0}}}=" + str(calldepth) + "|" + s + "}}"
+
 
 def mediawiki_build_template_with_args(template):
     """
@@ -57,46 +63,85 @@ def mediawiki_build_template_with_args(template):
     ]
 
     """
-    s=""
+    s = ""
 
+    values = get_arg_values()
     # [(argname,arg)]
     # arg = {{{i}}}, substituted by mediawiki
     par_arg_list = []
 
-    for i, par in enumerate(template.signature.parameters, 1):
-        par_arg_list.append((par.name,mediawiki_sub_arg(str(i))))
 
+    for i, (par,value) in enumerate(zip(template.signature.parameters,values['0']), 1):
+        # print('par',par.name)
+        if isinstance(value,list):
+            value=tuple(value)
+        par_arg_list.append((par.name, value))
+
+    # print('list_after',par_arg_list)
 
     s = f"{template.signature.template_name} [\n"
 
-    parlens = [len(par) for (par,_) in par_arg_list]
+    parlens = [len(par) for (par, _) in par_arg_list]
     longest_par = max(parlens)
 
     for par, arg in par_arg_list:
+        s += NON_BREAKING_SPACE * 8
+        s += f"{par}"
+        s += NON_BREAKING_SPACE * (longest_par - len(par) + 2) + "=" + NON_BREAKING_SPACE * 2
+        s += f"{arg}\n"
 
-        s+= NON_BREAKING_SPACE*8
-        s+= f"{par}"
-        s+= NON_BREAKING_SPACE*(longest_par-len(par)+2) +"=" + NON_BREAKING_SPACE*2
-        s+= f"{arg}\n"
-
-    s+= "]\n"
-    #s += "</code>"
-
+    s += "]\n"
+    # s += "</code>"
 
     s = mediawiki_replace_newline_br(s)
 
-    #s = mediawiki_wrap_in_code(s)
+    # s = mediawiki_wrap_in_code(s)
     return s
 
-def mediawiki_wrap_in_color_box(s,color='yellow'):
 
+def mediawiki_wrap_in_color_box(s, color='yellow'):
     return f"<span style=\"background-color:{color}\">{s}</span>"
 
+
 def mediawiki_replace_newline_br(s):
-    return s.replace("\n","<br>")
+    return s.replace("\n", "<br>")
 
 
-def mediawiki_colorbox(title,content):
+def save_arg_values(instances):
+    values = dict()
+
+    for i,instance in enumerate(instances):
+        values[i] = []
+        constants = [x.term.inner_constant_ref for x in instance.argument_list]
+
+        #process literals
+        for constant in constants:
+           # print(constant.__dict__)
+            # list of literals
+            if constant.constant_list:
+                conlist = []
+                for constant_ in constant.constant_list:
+                    if constant_.literal:
+                        conlist.append(constant_.literal.value+'^'+constant_.literal.literal_type)
+                    else:
+                        conlist.append(constant_.source_str)
+                values[i].append(conlist)
+            # single literals
+            else:
+                #print(constant.literal.__dict__)
+                values[i].append(constant.literal.value+'^'+constant.literal.literal_type)
+                #types[i].append(constant.)
+
+    with open('values.txt', 'w') as f:
+      json.dump(values, f, ensure_ascii=False)
+
+def get_arg_values():
+    with open('values.txt', 'r') as f:
+        values = json.load( f)
+    return values
+
+
+def mediawiki_colorbox(title, content):
     """
     Template:Colored_box must be present in mediawiki!
 
@@ -105,13 +150,13 @@ def mediawiki_colorbox(title,content):
 
     return f"{{{{Colored box|title={title}|content={content}}}}}"
 
+
 class SMWGenerator:
 
     def __init__(self, prefixes: List[PrefixID], definitions: List[Template], instances: List[Instance]):
         self.prefixes = prefixes
         self.definitions = definitions
         self.instances = instances
-
 
     def produce_smw(self):
         """Produce the valid SMW Code for the init arguments for a page in a wiki.
@@ -131,6 +176,8 @@ class SMWGenerator:
 
         ### instance code here
         if len(self.instances) > 0 and len(self.definitions) == 0:
+            #print(self.instances[0].argument_list[0].term.is_list())
+            save_arg_values(self.instances)
             instances = self.produce_instances()
             # print("<pre>"+instances+"</pre>")
             print(instances)
@@ -153,7 +200,7 @@ class SMWGenerator:
             template_definitions = self.produce_templates(produce_forms)
             # is this correct?
 
-            #print(template_definitions)
+            # print(template_definitions)
 
         return prefixes, instances, template_definitions
 
@@ -168,8 +215,8 @@ class SMWGenerator:
             smw_context.call_occurrence_position = inst_pos
             instance_string += instance.get_smw_repr(smw_context)
 
-
-        return smw_context.produce_debug_str_start()  + mediawiki_colorbox('instance assignements',instance_string)+ smw_context.produce_debug_str_end() + smw_context.produce_triple_display() + "\n[[Category:OTTR_Instance]]"
+        return smw_context.produce_debug_str_start() + mediawiki_colorbox('instance assignements',
+                                                                          instance_string) + smw_context.produce_debug_str_end() + smw_context.produce_triple_display() + "\n[[Category:OTTR_Instance]]"
 
     def produce_templates(self, produce_form):
         form_string = ""
@@ -199,39 +246,36 @@ class SMWGenerator:
                 "".join([("{{{field|template_%i|holds template}}}" % i) for i in range(1, len(self.definitions) + 1)]),
                 self.definitions[0].signature.template_name)
 
-
         for i, template in enumerate(self.definitions, start=1):
             if template.pattern_list is None:
                 form_string = form_string % (template.get_form_repr(i, len(self.definitions) == 1) + "%s")
 
             else:
 
-
                 ### Template Code is run here ...
                 smw_context = SMWContext()
                 smw_context.call_occurrence_position = 0
                 upper_template_name = (template.signature.template_name[:1].upper() + template.signature.template_name[
-                                                                                     1:]).replace("_", " ")
+                                                                                      1:]).replace("_", " ")
 
-
-###
-                #print('\n')
-                #print(template.signature.template_name)
-
+                ###
+                # print('\n')
+                # print(template.signature.template_name)
 
                 s = mediawiki_build_template_with_args(template)
-                #s= mediawiki_wrap_in_color_box(s)
-                # use noinclude?!
-                print(mediawiki_wrap_if_calldepht(s,1))
 
-###
-                # a check if the template is in the template namespace
+                # s= mediawiki_wrap_in_color_box(s)
+                # use noinclude?!
+                print(mediawiki_wrap_if_calldepht(s, 1))
+
+                ###
+                # a check if the template is in the template valuespace
                 # and a check if the template name is the same as the page name (without the 'Template:'-Prefix) and throws an error otherwise
                 return (("<noinclude>"
                          "{{#ifeq:{{#pos:{{FULLPAGENAME}}|Template:}}|0|"
                          "{{#ifeq:{{#sub:{{FULLPAGENAME}}|9}}|%s||"
                          "{{ottr:ErrorMsg|Template name and Page name should be the same: %s (Template name), <b>{{#sub:{{FULLPAGENAME}}|9}}</b> (Pagename)|code=-1|type=Warning}}}}"
-                         "|{{ottr:ErrorMsg|Page does <b>NOT</b> lie in the <b>Template</b> namespace ({{FULLPAGENAME}})|code=-2|type=Warning}}}}"
+                         "|{{ottr:ErrorMsg|Page does <b>NOT</b> lie in the <b>Template</b> valuespace ({{FULLPAGENAME}})|code=-2|type=Warning}}}}"
                          " </noinclude>" % (upper_template_name, upper_template_name))
                         + (
                                 "<noinclude>{{#ifexpr: {{ottr:DisplayFormHelp}}|%s|}}</noinclude>" % template.get_form_help_str())
