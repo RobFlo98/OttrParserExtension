@@ -10,8 +10,8 @@ class OttrParserExtension {
 	// Render <ottr>...</ottr>
 	public static function renderOttrTag( $input, array $args, Parser $parser, PPFrame $frame ) {
 		$filename = './'. uniqid() . '.txt';
-		file_put_contents($filename, $input, LOCK_EX);
-		$command = 'ottrToSMW ' . $filename . " 2>&1";
+        file_put_contents($filename, $input, LOCK_EX);
+		$command = 'extensions/OttrParserExtension/ottr_env/bin/ottrToSMW ' . $filename . " 2>&1";
 		$code = shell_exec($command);
 		$deleted = unlink($filename);
 		if (array_key_exists('form', $args)){
@@ -34,7 +34,7 @@ class OttrParserExtension {
 		}
 		$filename = './' . uniqid() . '.txt';
 		file_put_contents($filename, $input, LOCK_EX);
-		$command = 'ottrToSMW ' . $filename . " 2>&1";
+		$command = 'extensions/OttrParserExtension/ottr_env/bin/ottrToSMW ' . $filename . " 2>&1";
 		$code = shell_exec($command);
 		$deleted = unlink($filename);
 		$display_ottr = '';
