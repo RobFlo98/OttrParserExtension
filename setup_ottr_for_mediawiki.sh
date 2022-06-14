@@ -25,11 +25,11 @@ Help()
    echo "Install OttrParserExtension for semantic media wiki."
    echo "More help here: https://github.com/Oliver-Tautz/OttrParserExtension."
    echo
-   echo "Syntax: setup_ottr_for_mediawiki.sh [-h] [-p path] [-e path]"
+   echo "Syntax: setup_ottr_for_mediawiki.sh [-hc] [-p path] [-e path]"
    echo "options:"
    echo "h     Print this Help."
-   echo "p     use explicit python binary instead of the one on PATH"
-   echo
+   echo "p     use explicit python/conda binary instead of the one on PATH"
+   echo "c     use conda instead of pip. Not implemented ..."
 }
 
 
@@ -38,7 +38,7 @@ envpath="ottr_env"
 setuppath="."
 
 #Help
-while getopts ":hp:e:i:" option; do
+while getopts ":hcp:e:" option; do
    case $option in
       h) # display Help
           Help
@@ -47,6 +47,9 @@ while getopts ":hp:e:i:" option; do
           pythonpath=$OPTARG;;
       i)
           setuppath=$OPTARG;;
+      c)
+          echo "Conda Setup not implemented :("
+          exit;;
       \?)
         echo "Error: Invalid option"
         Help
