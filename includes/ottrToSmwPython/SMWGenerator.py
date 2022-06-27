@@ -209,7 +209,7 @@ class SMWGenerator:
             if warnings:
                 print(warnings)
             template_definitions = self.produce_templates(produce_forms)
-            # is this correct?
+            template_definitions = mediawiki_wrap_if_calldepht(template_definitions,1)
 
             print(template_definitions)
 
@@ -269,18 +269,17 @@ class SMWGenerator:
                                                                                       1:]).replace("_", " ")
 
                 ###
-                # print('\n')
-                # print(template.signature.template_name)
 
+
+
+                # print template with args in colorbox here.
                 s = mediawiki_build_template_with_args(template)
 
-
-                # s= mediawiki_wrap_in_color_box(s)
-                # use noinclude?!
                 if s:
                     s = mediawiki_wrap_if_calldepht(s, 1)
                     print(mediawiki_colorbox('instance assignements', s))
                 ###
+
                 # a check if the template is in the template valuespace
                 # and a check if the template name is the same as the page name (without the 'Template:'-Prefix) and throws an error otherwise
                 return (("<noinclude>"
