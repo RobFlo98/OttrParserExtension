@@ -170,6 +170,8 @@ class SMWGenerator:
         """
 
         prefixes = self.produce_prefixes()
+        if prefixes:
+            print(prefixes)
         instances = ""
         template_definitions = ""
         warnings = ""
@@ -200,7 +202,7 @@ class SMWGenerator:
             template_definitions = self.produce_templates(produce_forms)
             # is this correct?
 
-            # print(template_definitions)
+            print(template_definitions)
 
         return prefixes, instances, template_definitions
 
