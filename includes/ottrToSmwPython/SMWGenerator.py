@@ -4,7 +4,7 @@ from includes.ottrToSmwPython.OTTRClassesForSMW import PrefixID, Template, Insta
 from typing import List
 import re
 import json
-
+import os
 
 NON_BREAKING_SPACE = "&nbsp;"
 
@@ -66,15 +66,17 @@ def mediawiki_build_template_with_args(template):
     s = ""
 
     values = get_arg_values()
+
+    if not values:
+        return None
     # [(argname,arg)]
     # arg = {{{i}}}, substituted by mediawiki
     par_arg_list = []
 
-
-    for i, (par,value) in enumerate(zip(template.signature.parameters,values['0']), 1):
+    for i, (par, value) in enumerate(zip(template.signature.parameters, values['0']), 1):
         # print('par',par.name)
-        if isinstance(value,list):
-            value=tuple(value)
+        if isinstance(value, list):
+            value = tuple(value)
         par_arg_list.append((par.name, value))
 
     # print('list_after',par_arg_list)
@@ -110,34 +112,41 @@ def mediawiki_replace_newline_br(s):
 def save_arg_values(instances):
     values = dict()
 
-    for i,instance in enumerate(instances):
+    for i, instance in enumerate(instances):
         values[i] = []
         constants = [x.term.inner_constant_ref for x in instance.argument_list]
 
-        #process literals
+        # process literals
         for constant in constants:
-           # print(constant.__dict__)
+
             # list of literals
+
             if constant.constant_list:
                 conlist = []
                 for constant_ in constant.constant_list:
                     if constant_.literal:
-                        conlist.append(constant_.literal.value+'^'+constant_.literal.literal_type)
+                        conlist.append(constant_.literal.value + '^' + constant_.literal.literal_type)
                     else:
                         conlist.append(constant_.source_str)
                 values[i].append(conlist)
             # single literals
+            if constant.literal:
+                values[i].append(constant.literal.value + '^' + constant.literal.literal_type)
             else:
-                #print(constant.literal.__dict__)
-                values[i].append(constant.literal.value+'^'+constant.literal.literal_type)
-                #types[i].append(constant.)
+                values[i].append(constant.source_str)
 
     with open('values.txt', 'w') as f:
-      json.dump(values, f, ensure_ascii=False)
+        json.dump(values, f, ensure_ascii=False)
+
 
 def get_arg_values():
-    with open('values.txt', 'r') as f:
-        values = json.load( f)
+    try:
+        with open('values.txt', 'r') as f:
+            values = json.load(f)
+        os.remove('values.txt')
+    except FileNotFoundError as e:
+        return None
+
     return values
 
 
@@ -178,7 +187,7 @@ class SMWGenerator:
 
         ### instance code here
         if len(self.instances) > 0 and len(self.definitions) == 0:
-            #print(self.instances[0].argument_list[0].term.is_list())
+            # print(self.instances[0].argument_list[0].term.is_list())
             save_arg_values(self.instances)
             instances = self.produce_instances()
             # print("<pre>"+instances+"</pre>")
@@ -217,8 +226,7 @@ class SMWGenerator:
             smw_context.call_occurrence_position = inst_pos
             instance_string += instance.get_smw_repr(smw_context)
 
-        return smw_context.produce_debug_str_start() + mediawiki_colorbox('instance assignements',
-                                                                          instance_string) + smw_context.produce_debug_str_end() + smw_context.produce_triple_display() + "\n[[Category:OTTR_Instance]]"
+        return smw_context.produce_debug_str_start() + instance_string + smw_context.produce_debug_str_end() + smw_context.produce_triple_display() + "\n[[Category:OTTR_Instance]]"
 
     def produce_templates(self, produce_form):
         form_string = ""
@@ -266,10 +274,12 @@ class SMWGenerator:
 
                 s = mediawiki_build_template_with_args(template)
 
+
                 # s= mediawiki_wrap_in_color_box(s)
                 # use noinclude?!
-                print(mediawiki_wrap_if_calldepht(s, 1))
-
+                if s:
+                    s = mediawiki_wrap_if_calldepht(s, 1)
+                    print(mediawiki_colorbox('instance assignements', s))
                 ###
                 # a check if the template is in the template valuespace
                 # and a check if the template name is the same as the page name (without the 'Template:'-Prefix) and throws an error otherwise
