@@ -36,9 +36,10 @@ Help()
 pythonpath="python"
 envpath="ottr_env"
 setuppath="."
-
+use_conda=false
+shellname=bash
 #Help
-while getopts ":hcp:e:" option; do
+while getopts ":hcp:e:s:" option; do
    case $option in
       h) # display Help
           Help
@@ -48,8 +49,9 @@ while getopts ":hcp:e:" option; do
       i)
           setuppath=$OPTARG;;
       c)
-          echo "Conda Setup not implemented :("
-          exit;;
+          use_conda=true;;
+      s)
+          shellname=$OPTARG;;
       \?)
         echo "Error: Invalid option"
         Help
@@ -60,8 +62,16 @@ done
 while true; do
    read -p  "Setup and install ottrparser into new environment at $envpath ? [Y/N]" yn
    case $yn in
-   [Yy]* ) $pythonpath -m venv $envpath
-           $envpath/bin/python -m pip install $setuppath; 
+   [Yy]* ) 
+           if [ "$use_conda" = true ] ; then
+              $pythonpath create -p $envpath
+              $pythonpath activate $envpath
+              $pythonpath install pip
+              pip install .
+           else 
+              $pythonpath -m venv $envpath
+              $envpath/bin/python -m pip install $setuppath; 
+           fi
            break;; 
    [Nn]* ) exit;;
    * ) echo "Please anser yes or no";;

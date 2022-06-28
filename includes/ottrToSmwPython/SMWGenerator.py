@@ -68,7 +68,7 @@ def mediawiki_build_template_with_args(template):
     #"2.0" {0: ['Dpm:ExampleCompound', ['dpm:Fe', 'dpm:O'], '(dpm:Fe, dpm:O)', ['"2.0"^^xsd:string', '"2.0"^^xsd:string'], '("2.0"^^xsd:float,"2.0"^^xsd:float)']}
 
     values = get_arg_values()
-    print(values)
+
     if not values:
         return None
     # [(argname,arg)]
