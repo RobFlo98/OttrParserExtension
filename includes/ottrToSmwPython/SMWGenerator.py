@@ -209,7 +209,7 @@ class SMWGenerator:
             if warnings:
                 print(warnings)
             template_definitions = self.produce_templates(produce_forms)
-            template_definitions = mediawiki_wrap_if_calldepht(template_definitions,1)
+            template_definitions = template_definitions
 
             print(template_definitions)
 
@@ -281,7 +281,7 @@ class SMWGenerator:
                 ###
 
                 # a check if the template is in the template valuespace
-                # and a check if the template name is the same as the page name (without the 'Template:'-Prefix) and throws an error otherwise
+                # and a check if the template name is the same as the page name (without the 'Template:'-/-->Prefix) and throws an error otherwise
                 return (("<noinclude>"
                          "{{#ifeq:{{#pos:{{FULLPAGENAME}}|Template:}}|0|"
                          "{{#ifeq:{{#sub:{{FULLPAGENAME}}|9}}|%s||"
