@@ -65,8 +65,10 @@ def mediawiki_build_template_with_args(template):
     """
     s = ""
 
-    values = get_arg_values()
+    #"2.0" {0: ['Dpm:ExampleCompound', ['dpm:Fe', 'dpm:O'], '(dpm:Fe, dpm:O)', ['"2.0"^^xsd:string', '"2.0"^^xsd:string'], '("2.0"^^xsd:float,"2.0"^^xsd:float)']}
 
+    values = get_arg_values()
+    print(values)
     if not values:
         return None
     # [(argname,arg)]
@@ -116,22 +118,28 @@ def save_arg_values(instances):
         values[i] = []
         constants = [x.term.inner_constant_ref for x in instance.argument_list]
 
+
         # process literals
         for constant in constants:
 
             # list of literals
+            # Extra processing of lists is not needed for now!
 
-            if constant.constant_list:
-                conlist = []
-                for constant_ in constant.constant_list:
-                    if constant_.literal:
-                        conlist.append(constant_.literal.value + '^' + constant_.literal.literal_type)
-                    else:
-                        conlist.append(constant_.source_str)
-                values[i].append(conlist)
+#            if constant.constant_list:
+#                conlist = []
+#                for constant_ in constant.constant_list:
+#                    #print(constant_.__dict__)
+#                    if constant_.literal:#
+#
+#                        conlist.append(constant_.literal.value + '^^' + constant_.literal.literal_type)
+#                    else:
+#                        conlist.append(constant_.source_str)
+#                values[i].append(conlist)
+
+
             # single literals
             if constant.literal:
-                values[i].append(constant.literal.value + '^' + constant.literal.literal_type)
+                values[i].append(f"{constant.literal.value}^^{constant.literal.literal_type}")
             else:
                 values[i].append(constant.source_str)
 
