@@ -5,7 +5,8 @@ from typing import List
 import re
 import json
 import os
-
+from includes.ottrToSmwPython.Settings import  ottr_template_namespaces
+from functools import reduce
 NON_BREAKING_SPACE = "&nbsp;"
 
 
@@ -109,6 +110,16 @@ def mediawiki_wrap_in_color_box(s, color='yellow'):
 
 def mediawiki_replace_newline_br(s):
     return s.replace("\n", "<br>")
+
+
+def mediawiki_generate_template_query():
+
+    list_of_options =  ["{{#ifeq:{{#pos:{{FULLPAGENAME}}|%s:}}|0|1|0}}" % x.capitalize() for x in ottr_template_namespaces]
+
+    options = reduce(lambda x,y : x+" or "+y ,list_of_options ,"0" )
+
+    return options
+
 
 
 def save_arg_values(instances):
@@ -288,12 +299,15 @@ class SMWGenerator:
                     print(mediawiki_colorbox('instance assignements', s))
                 ###
 
+                wrong_namespace_warning_text = "{{ottr:ErrorMsg|Page ({{FULLPAGENAME}}) does <b>NOT</b> lie in one of <b>%s</b> namespaces. You can add custom namespaces to Settings.py! )|code=-2|type=Warning}}" % (ottr_template_namespaces,)
+
                 # a check if the template is in the template valuespace
                 # and a check if the template name is the same as the page name (without the 'Template:'-/-->Prefix) and throws an error otherwise
                 return (("<noinclude>"
                          
-                         "{{#ifeq:{{#pos:{{FULLPAGENAME}}|Template:}}|0||{{ottr:ErrorMsg|Page does <b>NOT</b> lie in the <b>Template</b> valuespace ({{FULLPAGENAME}})|code=-2|type=Warning}}}}"
-                         "{{#ifeq:{{#sub:{{FULLPAGENAME}}|9}}|%s||{{ottr:ErrorMsg|Template name and Page name should be the same: %s (Template name), <b>{{#sub:{{FULLPAGENAME}}|9}}</b> (Pagename)|code=-1|type=Warning}}}}"
+                         "{{#ifexpr: %s ||%s}}" % (mediawiki_generate_template_query(),wrong_namespace_warning_text)
+                         
+                         +"{{#ifeq:{{#sub:{{FULLPAGENAME}}|9}}|%s||{{ottr:ErrorMsg|Template name and Page name should be the same:<b> %s </b>(Template name) , <b>{{FULLPAGENAME}}</b> (Pagename)|code=-1|type=Warning}}}}"
                                                   " </noinclude>" % (upper_template_name, upper_template_name))
                         + (
                                 "<noinclude>{{#ifexpr: {{ottr:DisplayFormHelp}}|%s|}}</noinclude>" % template.get_form_help_str())
