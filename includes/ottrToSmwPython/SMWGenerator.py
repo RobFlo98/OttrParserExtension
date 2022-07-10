@@ -291,11 +291,10 @@ class SMWGenerator:
                 # a check if the template is in the template valuespace
                 # and a check if the template name is the same as the page name (without the 'Template:'-/-->Prefix) and throws an error otherwise
                 return (("<noinclude>"
-                         "{{#ifeq:{{#pos:{{FULLPAGENAME}}|Template:}}|0|"
-                         "{{#ifeq:{{#sub:{{FULLPAGENAME}}|9}}|%s||"
-                         "{{ottr:ErrorMsg|Template name and Page name should be the same: %s (Template name), <b>{{#sub:{{FULLPAGENAME}}|9}}</b> (Pagename)|code=-1|type=Warning}}}}"
-                         "|{{ottr:ErrorMsg|Page does <b>NOT</b> lie in the <b>Template</b> valuespace ({{FULLPAGENAME}})|code=-2|type=Warning}}}}"
-                         " </noinclude>" % (upper_template_name, upper_template_name))
+                         
+                         "{{#ifeq:{{#pos:{{FULLPAGENAME}}|Template:}}|0||{{ottr:ErrorMsg|Page does <b>NOT</b> lie in the <b>Template</b> valuespace ({{FULLPAGENAME}})|code=-2|type=Warning}}}}"
+                         "{{#ifeq:{{#sub:{{FULLPAGENAME}}|9}}|%s||{{ottr:ErrorMsg|Template name and Page name should be the same: %s (Template name), <b>{{#sub:{{FULLPAGENAME}}|9}}</b> (Pagename)|code=-1|type=Warning}}}}"
+                                                  " </noinclude>" % (upper_template_name, upper_template_name))
                         + (
                                 "<noinclude>{{#ifexpr: {{ottr:DisplayFormHelp}}|%s|}}</noinclude>" % template.get_form_help_str())
                         + "<includeonly>"
