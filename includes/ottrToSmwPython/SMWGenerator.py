@@ -299,6 +299,6 @@ class SMWGenerator:
                         + (
                                 "<noinclude>{{#ifexpr: {{ottr:DisplayFormHelp}}|%s|}}</noinclude>" % template.get_form_help_str())
                         + "<includeonly>"
-                        + template.get_smw_repr(smw_context)
+                        #+ template.get_smw_repr(smw_context)
                         + "</includeonly><noinclude>[[Category:OTTR_Template]]</noinclude>")
         return form_string % ""
