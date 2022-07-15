@@ -51,7 +51,13 @@ def mediawiki_sub_arg(arg):
 def mediawiki_wrap_if_calldepht(s, calldepth):
     return "{{#ifexpr:{{{call_depth|0}}}=" + str(calldepth) + "|" + s + "}}"
 
+def wrap_in_quotes(string):
+    if string[0]!='"':
+        string = f'"{string}'
+    if string[-1]!= '"':
+        string =f'{string}"'
 
+    return string
 def mediawiki_build_template_with_args(template):
     """
     Get ottr template string with instance args. String will be read in mediawiki as
@@ -64,7 +70,7 @@ def mediawiki_build_template_with_args(template):
     ]
 
     """
-    s = ""
+
 
     #"2.0" {0: ['Dpm:ExampleCompound', ['dpm:Fe', 'dpm:O'], '(dpm:Fe, dpm:O)', ['"2.0"^^xsd:string', '"2.0"^^xsd:string'], '("2.0"^^xsd:float,"2.0"^^xsd:float)']}
 
@@ -86,15 +92,20 @@ def mediawiki_build_template_with_args(template):
 
     s = f"{template.signature.template_name} [\n"
 
+    s+= f"<table>"
     parlens = [len(par) for (par, _) in par_arg_list]
     longest_par = max(parlens)
 
     for par, arg in par_arg_list:
-        s += NON_BREAKING_SPACE * 8
+        s+="<tr><td></td><td>"
         s += f"{par}"
-        s += NON_BREAKING_SPACE * (longest_par - len(par) + 2) + "=" + NON_BREAKING_SPACE * 2
-        s += f"{arg}\n"
+        s+= "</td><td>=</td>"
 
+        s+= "<td>"
+        s += f"{arg}\n"
+        s+="</td></tr>"
+
+    s+="</table>"
     s += "]\n"
     # s += "</code>"
 
@@ -150,7 +161,7 @@ def save_arg_values(instances):
 
             # single literals
             if constant.literal:
-                values[i].append(f"{constant.literal.value}^^{constant.literal.literal_type}")
+                values[i].append(f"{wrap_in_quotes(constant.literal.value)}^^{constant.literal.literal_type}")
             else:
                 values[i].append(constant.source_str)
 
@@ -312,6 +323,6 @@ class SMWGenerator:
                         + (
                                 "<noinclude>{{#ifexpr: {{ottr:DisplayFormHelp}}|%s|}}</noinclude>" % template.get_form_help_str())
                         + "<includeonly>"
-                        #+ template.get_smw_repr(smw_context)
+                        + template.get_smw_repr(smw_context)
                         + "</includeonly><noinclude>[[Category:OTTR_Template]]</noinclude>")
         return form_string % ""
