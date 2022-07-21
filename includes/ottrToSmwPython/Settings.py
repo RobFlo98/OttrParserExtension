@@ -1,5 +1,5 @@
 
-Default_Namespaces = ["Main"]
+Default_Namespaces = ['Main','Template','Dpm']
 
 # acceptable namespaces for ottr_templates
 # add yours to surpress warning
