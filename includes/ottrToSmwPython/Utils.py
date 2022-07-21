@@ -27,6 +27,8 @@ def get_input_type_of_ottr_type(type):
                 return "dropdown|values=true,false"
             if type.type_value == "xsd:string":
                 return "textarea"
+            if type.type_value == 'xsd:date':
+                return "datepicker|date format=YYYY-MM-DD"
             return "combobox|values from category=" + type.type_value
     # if is lub: only first category without depth?
     return "text"
