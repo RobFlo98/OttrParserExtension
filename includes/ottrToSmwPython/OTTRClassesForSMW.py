@@ -723,12 +723,13 @@ class Signature:
         args_form = ""
         for para in self.parameters:
             # input type of the field depends on requested type of the parameter, mapping is defined in Utils.py
-            field = "{{{field|arg_%i|input type=%s%s%s}}}" % (
+            field = "{{{field|arg_%i|input type=%s%s%s|autocapitalize=off}}}" % (
                 para.pos,
                 get_input_type_of_ottr_type(para.otype),
                 ("|default=" + para.default.get_smw_repr(for_form=True)) if para.default else "",
                 "|placeholder=%i. argument" % para.pos
             )
+
             # information around the field
             if para.otype:
                 if para.otype and para.otype.type_ in [
@@ -749,14 +750,16 @@ class Signature:
 
                 else:
                     typehint = "<td></td>"
+
                 #print(para_type, para_type == "NEList<xsd:float>", typehint)
 
             else:
                 typestr = ''
                 typehint = "<td><i></i></td>"
+                listhint = '<td></td>'
 
             args_form += "<tr><th>%s:</th><td>%s</td><td>%s</td>%s%s%s</tr>" % (
-                para.name[1:].capitalize(),
+                para.name[1:],
                 "".join(para.parameter_modes) + ("-DFLT-" if para.default else ""),
                 field,
                 typestr,
