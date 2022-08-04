@@ -1,9 +1,18 @@
 import sys
 import os.path
-#sys.path.append(
+# sys.path.append(
 #    os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir, os.path.pardir)))
 
 from includes.ottrToSmwPython import Settings
+
+literal_types = ["rdfs:resource", "xsd:boolean", "xsd:float", "xsd:integer", "xsd:string",'xsd:date']
+
+
+def type_wrapping_string(x):
+    if x in literal_types:
+        return f'""^^{x}'
+    else:
+        return ''
 
 
 def get_text(context):
@@ -18,20 +27,31 @@ class DELIMITERS:
 
 def get_input_type_of_ottr_type(type):
     if type is not None:
+
         if type.type_ == "BASIC":
             if type.type_value == "ottr:IRI":
-                return "combobox|values from namespace=" + ",".join(Settings.Default_Namespaces)
-            if type.type_value in ["xsd:integer", "xsd:float"]:
-                return "text"
+                # "combobox|values from namespace=Main,Dpm,Template"
+                return "combobox|values from namespace=" + ",".join(Settings.Default_Namespaces), ''
+            if type.type_value == "xsd:float":
+                return "text", type_wrapping_string(type.type_value)
+            if type.type_value == "xsd:integer":
+                return "text", type_wrapping_string(type.type_value)
             if type.type_value == "xsd:boolean":
-                return "dropdown|values=true,false"
+                return "dropdown|values=\"true\"^^xsd_boolean,\"false\"^csd_boolean", ''
             if type.type_value == "xsd:string":
-                return "textarea"
+                return "textarea", type_wrapping_string(type.type_value)
             if type.type_value == 'xsd:date':
-                return "datepicker|date format=YYYY-MM-DD"
-            return "combobox|values from category=" + type.type_value
+                return "text", type_wrapping_string(type.type_value)
+                # return "datepicker|date format=YYYY-MM-DD"
+            return "combobox|values from category=" + type.type_value, ''
+        elif type.type_ == "NEList":
+
+            return "text", f'({type_wrapping_string(type.get_nested_type_value())}, {type_wrapping_string(type.get_nested_type_value())})'
+        else:
+            return "text", ''
+
     # if is lub: only first category without depth?
-    return "text"
+    return "text", ''
 
 
 def get_min_max_size(array_keys, operator):
@@ -39,9 +59,11 @@ def get_min_max_size(array_keys, operator):
     min_expr = "%s"
     for idx in range(len(array_keys) - 1):
         inner_expressions = []
-        for idx_2 in list(range(len(array_keys))[idx+1:]) + list(range(len(array_keys))[:idx]):
-            inner_expressions.append("({{#arraysize:%s}} %s {{#arraysize:%s}})" % (array_keys[idx], operator, array_keys[idx_2]))
-        min_expr %= ("{{#ifexpr: %s|%s|%%s}}" % (" and ".join(inner_expressions), ("{{#arraysize:%s}}" % array_keys[idx])))
+        for idx_2 in list(range(len(array_keys))[idx + 1:]) + list(range(len(array_keys))[:idx]):
+            inner_expressions.append(
+                "({{#arraysize:%s}} %s {{#arraysize:%s}})" % (array_keys[idx], operator, array_keys[idx_2]))
+        min_expr %= ("{{#ifexpr: %s|%s|%%s}}" % (
+        " and ".join(inner_expressions), ("{{#arraysize:%s}}" % array_keys[idx])))
     min_expr %= ("{{#arraysize:%s}}" % array_keys[-1])
     return min_expr
 

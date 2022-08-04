@@ -5,8 +5,9 @@ from typing import List
 import re
 import json
 import os
-from includes.ottrToSmwPython.Settings import  ottr_template_namespaces
+from includes.ottrToSmwPython.Settings import ottr_template_namespaces
 from functools import reduce
+
 NON_BREAKING_SPACE = "&nbsp;"
 
 
@@ -51,13 +52,16 @@ def mediawiki_sub_arg(arg):
 def mediawiki_wrap_if_calldepht(s, calldepth):
     return "{{#ifexpr:{{{call_depth|0}}}=" + str(calldepth) + "|" + s + "}}"
 
+
 def wrap_in_quotes(string):
-    if string[0]!='"':
+    if string[0] != '"':
         string = f'"{string}'
-    if string[-1]!= '"':
-        string =f'{string}"'
+    if string[-1] != '"':
+        string = f'{string}"'
 
     return string
+
+
 def mediawiki_build_template_with_args(template):
     """
     Get ottr template string with instance args. String will be read in mediawiki as
@@ -71,8 +75,7 @@ def mediawiki_build_template_with_args(template):
 
     """
 
-
-    #"2.0" {0: ['Dpm:ExampleCompound', ['dpm:Fe', 'dpm:O'], '(dpm:Fe, dpm:O)', ['"2.0"^^xsd:string', '"2.0"^^xsd:string'], '("2.0"^^xsd:float,"2.0"^^xsd:float)']}
+    # "2.0" {0: ['Dpm:ExampleCompound', ['dpm:Fe', 'dpm:O'], '(dpm:Fe, dpm:O)', ['"2.0"^^xsd:string', '"2.0"^^xsd:string'], '("2.0"^^xsd:float,"2.0"^^xsd:float)']}
 
     values = get_arg_values()
 
@@ -92,20 +95,20 @@ def mediawiki_build_template_with_args(template):
 
     s = f"{template.signature.template_name} [\n"
 
-    s+= f"<table>"
+    s += f"<table>"
     parlens = [len(par) for (par, _) in par_arg_list]
     longest_par = max(parlens)
 
     for par, arg in par_arg_list:
-        s+="<tr><td></td><td>"
+        s += "<tr><td></td><td>"
         s += f"{par}"
-        s+= "</td><td>=</td>"
+        s += "</td><td>=</td>"
 
-        s+= "<td>"
+        s += "<td>"
         s += f"{arg}\n"
-        s+="</td></tr>"
+        s += "</td></tr>"
 
-    s+="</table>"
+    s += "</table>"
     s += "]\n"
     # s += "</code>"
 
@@ -124,13 +127,12 @@ def mediawiki_replace_newline_br(s):
 
 
 def mediawiki_generate_template_query():
+    list_of_options = ["{{#ifeq:{{#pos:{{FULLPAGENAME}}|%s:}}|0|1|0}}" % x.capitalize() for x in
+                       ottr_template_namespaces]
 
-    list_of_options =  ["{{#ifeq:{{#pos:{{FULLPAGENAME}}|%s:}}|0|1|0}}" % x.capitalize() for x in ottr_template_namespaces]
-
-    options = reduce(lambda x,y : x+" or "+y ,list_of_options ,"0" )
+    options = reduce(lambda x, y: x + " or " + y, list_of_options, "0")
 
     return options
-
 
 
 def save_arg_values(instances):
@@ -140,24 +142,22 @@ def save_arg_values(instances):
         values[i] = []
         constants = [x.term.inner_constant_ref for x in instance.argument_list]
 
-
         # process literals
         for constant in constants:
 
             # list of literals
             # Extra processing of lists is not needed for now!
 
-#            if constant.constant_list:
-#                conlist = []
-#                for constant_ in constant.constant_list:
-#                    #print(constant_.__dict__)
-#                    if constant_.literal:#
-#
-#                        conlist.append(constant_.literal.value + '^^' + constant_.literal.literal_type)
-#                    else:
-#                        conlist.append(constant_.source_str)
-#                values[i].append(conlist)
-
+            #            if constant.constant_list:
+            #                conlist = []
+            #                for constant_ in constant.constant_list:
+            #                    #print(constant_.__dict__)
+            #                    if constant_.literal:#
+            #
+            #                        conlist.append(constant_.literal.value + '^^' + constant_.literal.literal_type)
+            #                    else:
+            #                        conlist.append(constant_.source_str)
+            #                values[i].append(conlist)
 
             # single literals
             if constant.literal:
@@ -224,6 +224,7 @@ class SMWGenerator:
             print(instances)
 
 
+
         ### Template code here!
         elif len(self.definitions) > 0:
             templates_with_content = [d for d in self.definitions if d.pattern_list is not None]
@@ -287,6 +288,7 @@ class SMWGenerator:
                 self.definitions[0].signature.template_name)
 
         for i, template in enumerate(self.definitions, start=1):
+
             if template.pattern_list is None:
                 form_string = form_string % (template.get_form_repr(i, len(self.definitions) == 1) + "%s")
 
@@ -299,9 +301,7 @@ class SMWGenerator:
                                                                                       1:]).replace("_", " ")
 
                 ###
-
-
-
+                print(f"{{{{#set: instance_template_name={template.signature.template_name} }}}}")
                 # print template with args in colorbox here.
                 s = mediawiki_build_template_with_args(template)
 
@@ -310,19 +310,24 @@ class SMWGenerator:
                     print(mediawiki_colorbox('instance assignements', s))
                 ###
 
-                wrong_namespace_warning_text = "{{ottr:ErrorMsg|Page ({{FULLPAGENAME}}) does <b>NOT</b> lie in one of <b>%s</b> namespaces. You can add custom namespaces to Settings.py! )|code=-2|type=Warning}}" % (ottr_template_namespaces,)
+                wrong_namespace_warning_text = "{{ottr:ErrorMsg|Page ({{FULLPAGENAME}}) does <b>NOT</b> lie in one of <b>%s</b> namespaces. You can add custom namespaces to Settings.py! )|code=-2|type=Warning}}" % (
+                    ottr_template_namespaces,)
 
                 # a check if the template is in the template valuespace
                 # and a check if the template name is the same as the page name (without the 'Template:'-/-->Prefix) and throws an error otherwise
                 return (("<noinclude>"
-                         
-                         "{{#ifexpr: %s ||%s}}" % (mediawiki_generate_template_query(),wrong_namespace_warning_text)
-                         
-                         +"{{#ifeq:{{#sub:{{FULLPAGENAME}}|9}}|%s||{{ottr:ErrorMsg|Template name and Page name should be the same:<b> %s </b>(Template name) , <b>{{FULLPAGENAME}}</b> (Pagename)|code=-1|type=Warning}}}}"
-                                                  " </noinclude>" % (upper_template_name, upper_template_name))
+
+                         "{{#ifexpr: %s ||%s}}" % (mediawiki_generate_template_query(), wrong_namespace_warning_text)
+
+                         + "{{#ifeq:{{#sub:{{FULLPAGENAME}}|9}}|%s||{{ottr:ErrorMsg|Template name and Page name should be the same:<b> %s </b>(Template name) , <b>{{FULLPAGENAME}}</b> (Pagename)|code=-1|type=Warning}}}}"
+                           " </noinclude>" % (upper_template_name, upper_template_name))
                         + (
                                 "<noinclude>{{#ifexpr: {{ottr:DisplayFormHelp}}|%s|}}</noinclude>" % template.get_form_help_str())
                         + "<includeonly>"
-                        + template.get_smw_repr(smw_context)
-                        + "</includeonly><noinclude>[[Category:OTTR_Template]]</noinclude>")
+                        + template.get_smw_repr(smw_context) + "</includeonly><noinclude>"
+                        + f"\ninstances: {{{{#ask:\
+             [[Category:OTTR Instance]]\
+             [[Instance template name ::{template.signature.template_name}]]\
+                         }}}}"
+                        + "[[Category:OTTR_Template]]</noinclude>")
         return form_string % ""

@@ -79,8 +79,12 @@ class SMWContext:
 
     @staticmethod
     def update_used_iri_single(reference):
-        return "{{#if: {{#pos:{{{ottr_arg_type_%i|}}}|ottr:IRI§}}|{{#vardefine: %s|{{#var:%s}}{{{%i|}}},}}}}" % (
-            reference, VarNames.UsedIris, VarNames.UsedIris, reference)
+
+        return "{{#if: {{#pos:{{{ottr_arg_type_%i|}}}|ottr:IRI§}}|{{#vardefine: %s|{{#var:%s}}{{{{{{%i}}}|}}},}}}} {{#createpageifnotex:{{{%i}}}|[[Category:dpm]]}} " % (
+        reference, VarNames.UsedIris, VarNames.UsedIris, reference, reference)
+
+        # return "{{#if: {{#pos:{{{ottr_arg_type_%i|}}}|ottr:IRI§}}|{{#vardefine: %s|{{#var:%s}}{{{%i|}}},}}}}" % (
+       #     reference, VarNames.UsedIris, VarNames.UsedIris, reference)
 
 
 class PrefixID:
@@ -418,6 +422,7 @@ class Instance:
                 smw = self.define_arrays(smw_context)
                 if self.list_expander is None:
                     smw += "{{%s%s}}" % (self.template_name, self.argument_list_smw_repr(smw_context))
+                    pass
                 else:
                     smw += self.list_expand_smw_repr(smw_context)
                     smw_context.call_occurrence_position += 1
@@ -444,12 +449,16 @@ class Instance:
         if self.argument_list:
             if not idx_ref_keys:
                 idx_ref_keys = [(None, None)] * len(self.argument_list)
-            return ("|" + "|".join([arg.get_smw_repr(smw_context, idx_ref=idx_ref_keys[idx]) for idx, arg in
+
+            s = ("|" + "|".join([arg.get_smw_repr(smw_context, idx_ref=idx_ref_keys[idx]) for idx, arg in
                                     enumerate(self.argument_list)])
                     + "|" + "|".join(
                         [f"ottr_arg_type_{idx + 1}={arg.get_smw_repr_type(smw_context, idx_ref=idx_ref_keys[idx])}" for
                          idx, arg in enumerate(self.argument_list)])
                     + call_occurrence)
+            #s = ""
+
+            return s
         return call_occurrence
 
     def list_expand_smw_repr(self, smw_context: SMWContext = None):
@@ -723,11 +732,13 @@ class Signature:
         args_form = ""
         for para in self.parameters:
             # input type of the field depends on requested type of the parameter, mapping is defined in Utils.py
+
+            type, default = get_input_type_of_ottr_type(para.otype)
             field = "{{{field|arg_%i|input type=%s%s%s|autocapitalize=off}}}" % (
                 para.pos,
-                get_input_type_of_ottr_type(para.otype),
-                ("|default=" + para.default.get_smw_repr(for_form=True)) if para.default else "",
-                "|placeholder=%i. argument" % para.pos
+                type,
+                ("|default=" + para.default.get_smw_repr(for_form=True)) if para.default else f'|default={default}',
+                ""
             )
 
             # information around the field
