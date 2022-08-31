@@ -5,7 +5,49 @@ import os.path
 
 from includes.ottrToSmwPython import Settings
 
-literal_types = ["rdfs:resource", "xsd:boolean", "xsd:float", "xsd:integer", "xsd:string",'xsd:date']
+literal_types = ["xsd:base64Binary",
+                 "xsd:boolean",
+                 "xsd:byte",
+                 "xsd:date",
+                 "xsd:dateTime",
+                 "xsd:decimal",
+                 "xsd:double",
+                 "xsd:duration",
+                 "xsd:ENTITIES",
+                 "xsd:ENTITY",
+                 "xsd:float",
+                 "xsd:gDay",
+                 "xsd:gMonth",
+                 "xsd:gMonthDay",
+                 "xsd:gYear",
+                 "xsd:gYearMonth",
+                 "xsd:hexBinary",
+                 "xsd:ID",
+                 "xsd:IDREF",
+                 "xsd:IDREFS",
+                 "xsd:int",
+                 "xsd:integer",
+                 "xsd:language",
+                 "xsd:long",
+                 "xsd:Name",
+                 "xsd:NCName",
+                 "xsd:negativeInteger",
+                 "xsd:NMTOKEN",
+                 "xsd:NMTOKENS",
+                 "xsd:nonNegativeInteger",
+                 "xsd:nonPositiveInteger",
+                 "xsd:normalizedString",
+                 "xsd:NOTATION",
+                 "xsd:positiveInteger",
+                 "xsd:QName",
+                 "xsd:short",
+                 "xsd:string",
+                 "xsd:time",
+                 "xsd:token",
+                 "xsd:unsignedByte",
+                 "xsd:unsignedInt",
+                 "xsd:unsignedLong",
+                 "xsd:unsignedShort", ]
 
 
 def type_wrapping_string(x):
@@ -32,15 +74,11 @@ def get_input_type_of_ottr_type(type):
             if type.type_value == "ottr:IRI":
                 # "combobox|values from namespace=Main,Dpm,Template"
                 return "combobox|values from namespace=" + ",".join(Settings.Default_Namespaces), ''
-            if type.type_value == "xsd:float":
-                return "text", type_wrapping_string(type.type_value)
-            if type.type_value == "xsd:integer":
-                return "text", type_wrapping_string(type.type_value)
             if type.type_value == "xsd:boolean":
                 return "dropdown|values=\"true\"^^xsd_boolean,\"false\"^csd_boolean", ''
             if type.type_value == "xsd:string":
                 return "textarea", type_wrapping_string(type.type_value)
-            if type.type_value == 'xsd:date':
+            if type.type_value in literal_types:
                 return "text", type_wrapping_string(type.type_value)
                 # return "datepicker|date format=YYYY-MM-DD"
             return "combobox|values from category=" + type.type_value, ''
@@ -63,7 +101,7 @@ def get_min_max_size(array_keys, operator):
             inner_expressions.append(
                 "({{#arraysize:%s}} %s {{#arraysize:%s}})" % (array_keys[idx], operator, array_keys[idx_2]))
         min_expr %= ("{{#ifexpr: %s|%s|%%s}}" % (
-        " and ".join(inner_expressions), ("{{#arraysize:%s}}" % array_keys[idx])))
+            " and ".join(inner_expressions), ("{{#arraysize:%s}}" % array_keys[idx])))
     min_expr %= ("{{#arraysize:%s}}" % array_keys[-1])
     return min_expr
 

@@ -325,9 +325,9 @@ class SMWGenerator:
                                 "<noinclude>{{#ifexpr: {{ottr:DisplayFormHelp}}|%s|}}</noinclude>" % template.get_form_help_str())
                         + "<includeonly>"
                         + template.get_smw_repr(smw_context) + "</includeonly><noinclude>"
-                        + f"\ninstances: {{{{#ask:\
+                        + f"\nExisting Instances: {{{{#ask:\
              [[Category:OTTR Instance]]\
              [[Instance template name ::{template.signature.template_name}]]\
-                         }}}}"
+             |limit=10   }}}}"
                         + "[[Category:OTTR_Template]]</noinclude>")
         return form_string % ""
