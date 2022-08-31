@@ -70,6 +70,7 @@ class DELIMITERS:
 def get_input_type_of_ottr_type(type):
     if type is not None:
 
+
         if type.type_ == "BASIC":
             if type.type_value == "ottr:IRI":
                 # "combobox|values from namespace=Main,Dpm,Template"

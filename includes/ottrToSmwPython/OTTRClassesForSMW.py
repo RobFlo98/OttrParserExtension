@@ -734,6 +734,8 @@ class Signature:
             # input type of the field depends on requested type of the parameter, mapping is defined in Utils.py
 
             type, default = get_input_type_of_ottr_type(para.otype)
+
+
             field = "{{{field|arg_%i|input type=%s%s%s|autocapitalize=off}}}" % (
                 para.pos,
                 type,
