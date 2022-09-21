@@ -28,11 +28,11 @@ statement
 /*** Comments ***/
 
 Comment
- : '#' ~('\r' | '\n')* -> skip
+ : '#' ~('\r' | '\n')* -> channel(HIDDEN)
  ;
 
 CommentBlock
- : '/***' .*? '***/' -> skip
+ : '/***' .*? '***/' -> channel(HIDDEN)
  ;
 
 

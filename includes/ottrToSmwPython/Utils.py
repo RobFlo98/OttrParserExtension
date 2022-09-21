@@ -70,13 +70,14 @@ class DELIMITERS:
 def get_input_type_of_ottr_type(type):
     if type is not None:
 
-
         if type.type_ == "BASIC":
-            if type.type_value == "ottr:IRI":
+            if type.type_value == "ottr:IRI" or type.type_value.lower().startswith(
+                    "dpm:") or type.type_value.lower().startswith("pmdco:") or type.type_value.lower().startswith(
+                    "emmo:"):
                 # "combobox|values from namespace=Main,Dpm,Template"
-                return "combobox|values from namespace=" + ",".join(Settings.Default_Namespaces), ''
+                return "combobox|values from category=Dpm", ''# + ",".join(Settings.Default_Namespaces), ''
             if type.type_value == "xsd:boolean":
-                return "dropdown|values=\"true\"^^xsd_boolean,\"false\"^csd_boolean", ''
+                return "dropdown|values=\"true\"^^xsd:boolean,\"false\"^xsd:boolean", ''
             if type.type_value == "xsd:string":
                 return "textarea", type_wrapping_string(type.type_value)
             if type.type_value in literal_types:

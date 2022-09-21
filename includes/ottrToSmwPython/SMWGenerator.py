@@ -192,10 +192,11 @@ def mediawiki_colorbox(title, content):
 
 class SMWGenerator:
 
-    def __init__(self, prefixes: List[PrefixID], definitions: List[Template], instances: List[Instance]):
+    def __init__(self, prefixes: List[PrefixID], definitions: List[Template], instances: List[Instance], comments):
         self.prefixes = prefixes
         self.definitions = definitions
         self.instances = instances
+        self.comments = comments
 
     def produce_smw(self):
         """Produce the valid SMW Code for the init arguments for a page in a wiki.
@@ -267,7 +268,8 @@ class SMWGenerator:
 			<div id="wikiPreview" style="display: none; padding-bottom: 25px; margin-bottom: 25px; border-bottom: 1px solid #AAAAAA;"></div>
 			Add/Change here OTTR instances for the generated/edited page.<br/>
 			<i>"?": optional argument, &emsp;"!": not a blank node ([] or _:example), &emsp; "DFLT": default value available</i> <br/>
-			Add '''none''' or '''ottr:none''' for optional arguments or for arguments that should be replaced by the default value.
+			Add '''none''' or '''ottr:none''' for optional arguments or for arguments that should be replaced by the default value. <br/>
+			%s
 			{{{for template|ottr:MultiInstanceCreation}}}
 			%s
 			{{{field|default_form|hidden|default=%s}}}
@@ -275,15 +277,16 @@ class SMWGenerator:
 			%%s
 			<br/>
 			<b>Free text:</b>
-			
+
 			{{{standard input|free text|rows=10}}}
-			
+
 			{{{standard input|summary}}}
-			
+
 			{{{standard input|minor edit}}} {{{standard input|watch}}}
-			
+
 			{{{standard input|save}}} {{{standard input|preview}}} {{{standard input|changes}}} {{{standard input|cancel}}}
 			""") % (
+                "<pre>"+"".join(self.comments)+"</pre",
                 "".join([("{{{field|template_%i|holds template}}}" % i) for i in range(1, len(self.definitions) + 1)]),
                 self.definitions[0].signature.template_name)
 
@@ -304,8 +307,9 @@ class SMWGenerator:
                 print(f"{{{{#set: instance_template_name={template.signature.template_name} }}}}")
                 # print template with args in colorbox here.
                 s = mediawiki_build_template_with_args(template)
-
+                print('HERE!!!!')
                 if s:
+                    print('HERE!!!!2')
                     s = mediawiki_wrap_if_calldepht(s, 1)
                     print(mediawiki_colorbox('instance assignements', s))
                 ###
@@ -323,6 +327,7 @@ class SMWGenerator:
                            " </noinclude>" % (upper_template_name, upper_template_name))
                         + (
                                 "<noinclude>{{#ifexpr: {{ottr:DisplayFormHelp}}|%s|}}</noinclude>" % template.get_form_help_str())
+                +'<pre>'+'\n\n'.join(self.comments)+'</pre>'
                         + "<includeonly>"
                         + template.get_smw_repr(smw_context) + "</includeonly><noinclude>"
                         + f"\nExisting Instances: {{{{#ask:\

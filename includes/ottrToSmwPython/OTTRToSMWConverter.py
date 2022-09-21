@@ -8,7 +8,7 @@ from includes.ottrToSmwPython.stOTTR.stOTTRParser import stOTTRParser
 
 class OTTRToSMWConverter(stOTTRListener):
 
-	def __init__(self):
+	def __init__(self, stream):
 		self.term = None
 		self.args_list = None
 		self.otype = None
@@ -29,6 +29,31 @@ class OTTRToSMWConverter(stOTTRListener):
 		self.type_value = None
 		self.template_name_buffer = None
 
+		# add the stream to get comments from second channel (see e.g. "The Definitive ANTLR 4 Reference" page 207)
+		self.stream = stream
+		stream.fill()
+
+	""""# Enter a parse tree produced by stOTTRParser#comment.
+	def enterComment(self, ctx: stOTTRParser.CommentContext):
+		pass
+		print('HERE!!!')
+
+
+	# Exit a parse tree produced by stOTTRParser#comment.
+	def exitComment(self, ctx: stOTTRParser.CommentContext):
+		pass
+"""
+	def __get_comments(self):
+		comments = []
+		# use high number to always get all tokens ...
+		for token in self.stream.getTokens(0, 100000000000000000000000):
+			#print(token)
+			# comments are in channel 1 (HIDDEN)
+			if token.channel == 1:
+				#print('<pre>', token.text, '</pre>')
+				comments.append(token.text)
+		return comments
+
 	# Enter a parse tree produced by stOTTRParser#stOTTRDoc.
 	def enterStOTTRDoc(self, ctx: stOTTRParser.StOTTRDocContext):
 		self.prefixIds = []
@@ -38,8 +63,8 @@ class OTTRToSMWConverter(stOTTRListener):
 
 	# Exit a parse tree produced by stOTTRParser#stOTTRDoc.
 	def exitStOTTRDoc(self, ctx: stOTTRParser.StOTTRDocContext):
-
-		smw_generator = SMWGenerator(prefixes=self.prefixIds, definitions=self.definition_statements, instances=self.instance_statements)
+		comments = self.__get_comments()
+		smw_generator = SMWGenerator(prefixes=self.prefixIds, definitions=self.definition_statements, instances=self.instance_statements,comments=comments)
 		smw_code = smw_generator.produce_smw()
 
 		self.prefixIds = None
@@ -52,6 +77,9 @@ class OTTRToSMWConverter(stOTTRListener):
 		self.patternlist = None
 		if ctx.instance():
 			self.instance = None
+
+
+
 
 	# Exit a parse tree produced by stOTTRParser#statement.
 	def exitStatement(self, ctx: stOTTRParser.StatementContext):
@@ -79,6 +107,8 @@ class OTTRToSMWConverter(stOTTRListener):
 		self.params = None
 		self.annos = None
 		self.template_name = None
+
+
 
 	# Enter a parse tree produced by stOTTRParser#templateName.
 	def enterTemplateName(self, ctx: stOTTRParser.TemplateNameContext):
@@ -190,6 +220,7 @@ class OTTRToSMWConverter(stOTTRListener):
 
 		self.template_name = None
 		self.args_list = None
+		ctx.getTokens(23)
 
 	# Enter a parse tree produced by stOTTRParser#argumentList.
 	def enterArgumentList(self, ctx: stOTTRParser.ArgumentListContext):
@@ -437,3 +468,4 @@ class OTTRToSMWConverter(stOTTRListener):
 	# Exit a parse tree produced by stOTTRParser#anon.
 	def exitAnon(self, ctx: stOTTRParser.AnonContext):
 		pass
+

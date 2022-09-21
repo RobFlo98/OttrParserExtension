@@ -5,6 +5,7 @@ from io import StringIO
 from typing.io import TextIO
 import sys
 
+
 def serializedATN():
     with StringIO() as buf:
         buf.write("\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\39")
@@ -281,6 +282,7 @@ class stOTTRParser ( Parser ):
 
 
 
+
     class StOTTRDocContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -356,6 +358,7 @@ class stOTTRParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class StatementContext(ParserRuleContext):
 
@@ -433,6 +436,7 @@ class stOTTRParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class SignatureContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -492,6 +496,7 @@ class stOTTRParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class TemplateNameContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -531,6 +536,7 @@ class stOTTRParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class ParameterListContext(ParserRuleContext):
 
@@ -597,6 +603,7 @@ class stOTTRParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class ParameterContext(ParserRuleContext):
 
@@ -678,6 +685,7 @@ class stOTTRParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class DefaultValueContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -719,6 +727,7 @@ class stOTTRParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class AnnotationListContext(ParserRuleContext):
 
@@ -776,6 +785,7 @@ class stOTTRParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class AnnotationContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -817,6 +827,7 @@ class stOTTRParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class BaseTemplateContext(ParserRuleContext):
 
@@ -861,6 +872,7 @@ class stOTTRParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class TemplateContext(ParserRuleContext):
 
@@ -909,6 +921,7 @@ class stOTTRParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class PatternListContext(ParserRuleContext):
 
@@ -976,6 +989,7 @@ class stOTTRParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class InstanceContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -1035,6 +1049,7 @@ class stOTTRParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class ArgumentListContext(ParserRuleContext):
 
@@ -1102,6 +1117,7 @@ class stOTTRParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class ArgumentContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -1153,6 +1169,7 @@ class stOTTRParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class OtypeContext(ParserRuleContext):
 
@@ -1229,6 +1246,7 @@ class stOTTRParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class ListTypeContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -1272,6 +1290,7 @@ class stOTTRParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class NeListTypeContext(ParserRuleContext):
 
@@ -1317,6 +1336,7 @@ class stOTTRParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class LubTypeContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -1361,6 +1381,7 @@ class stOTTRParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class BasicTypeContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -1400,6 +1421,7 @@ class stOTTRParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class TermContext(ParserRuleContext):
 
@@ -1466,6 +1488,7 @@ class stOTTRParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class ConstantContext(ParserRuleContext):
 
@@ -1551,6 +1574,7 @@ class stOTTRParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class NoneContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -1587,6 +1611,7 @@ class stOTTRParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class TermListContext(ParserRuleContext):
 
@@ -1654,6 +1679,7 @@ class stOTTRParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class ConstantListContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -1719,6 +1745,7 @@ class stOTTRParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class DirectiveContext(ParserRuleContext):
 
@@ -1795,6 +1822,7 @@ class stOTTRParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class PrefixIDContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -1843,6 +1871,7 @@ class stOTTRParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class BaseContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -1886,6 +1915,7 @@ class stOTTRParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class SparqlBaseContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -1926,6 +1956,7 @@ class stOTTRParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class SparqlPrefixContext(ParserRuleContext):
 
@@ -1972,6 +2003,7 @@ class stOTTRParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class LiteralContext(ParserRuleContext):
 
@@ -2038,6 +2070,7 @@ class stOTTRParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class NumericLiteralContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -2088,6 +2121,7 @@ class stOTTRParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class RdfLiteralContext(ParserRuleContext):
 
@@ -2152,6 +2186,7 @@ class stOTTRParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class IriContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -2208,6 +2243,7 @@ class stOTTRParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class PrefixedNameContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -2255,6 +2291,7 @@ class stOTTRParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class BlankNodeContext(ParserRuleContext):
 
@@ -2311,6 +2348,7 @@ class stOTTRParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class AnonContext(ParserRuleContext):
 
