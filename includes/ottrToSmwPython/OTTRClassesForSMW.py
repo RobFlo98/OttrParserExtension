@@ -851,7 +851,9 @@ class Template:
     def get_form_repr(self, position_in_multiple, needs_minimum):
         return self.signature.get_form_repr(position_in_multiple, needs_minimum)
 
-    def get_form_help_str(self):
+    def get_form_help_str(self,comments):
+        if len(comments) < 1:
+            comments = ""
         return textwrap.dedent("""\
 		<b>Form Info:</b><br/>The OTTR-Extension comes with an automated form creation, which simplifies the generation of instances of a template via input fields:
 		{{#ifexpr: {{exists|Form:%s}}|: [[Form:%s|Create instance with form]]
@@ -865,8 +867,9 @@ class Template:
 		preloadparams[]=%s
 		preloadparams[]=%s.
 		preloadparams[]=}}
+		preloadparams[]=%s
 		</inputbox>}}""") % (self.signature.template_name, self.signature.template_name, self.signature.template_name,
-                             self.signature.template_name, self.signature.source_str)
+                             self.signature.template_name, self.signature.source_str , '<br>'.join(comments))
 
 
 class Term:

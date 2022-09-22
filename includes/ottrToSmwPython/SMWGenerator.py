@@ -307,9 +307,9 @@ class SMWGenerator:
                 print(f"{{{{#set: instance_template_name={template.signature.template_name} }}}}")
                 # print template with args in colorbox here.
                 s = mediawiki_build_template_with_args(template)
-                print('HERE!!!!')
+
                 if s:
-                    print('HERE!!!!2')
+
                     s = mediawiki_wrap_if_calldepht(s, 1)
                     print(mediawiki_colorbox('instance assignements', s))
                 ###
@@ -326,7 +326,7 @@ class SMWGenerator:
                          + "{{#ifeq:{{#sub:{{FULLPAGENAME}}|9}}|%s||{{ottr:ErrorMsg|Template name and Page name should be the same:<b> %s </b>(Template name) , <b>{{FULLPAGENAME}}</b> (Pagename)|code=-1|type=Warning}}}}"
                            " </noinclude>" % (upper_template_name, upper_template_name))
                         + (
-                                "<noinclude>{{#ifexpr: {{ottr:DisplayFormHelp}}|%s|}}</noinclude>" % template.get_form_help_str())
+                                "<noinclude>{{#ifexpr: {{ottr:DisplayFormHelp}}|%s|}}</noinclude>" % template.get_form_help_str(self.comments) )
                 +'<pre>'+'\n\n'.join(self.comments)+'</pre>'
                         + "<includeonly>"
                         + template.get_smw_repr(smw_context) + "</includeonly><noinclude>"
