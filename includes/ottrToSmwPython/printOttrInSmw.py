@@ -15,6 +15,29 @@ class MyTokenStream(CommonTokenStream):
         super()
 
 
+def mediawiki_add_whitespace_in_front(string):
+    lines = string.split('\n')
+    new_string = '\n '.join(lines)
+    return f" {new_string}"
+
+def mediawiki_highlight(text,word):
+    start = text.find(word)
+    return text[0:start]+'\'\'\''+ word+ '\'\'\''+ text[start+len("testdate"):]
+
+
+def debug_str(exception):
+    token = exception.offendingToken
+    tokenstream= token.getInputStream().strdata
+    highlighted_tokenstream = mediawiki_highlight(tokenstream,token.text)
+
+
+    line = token.line
+    col = token.column
+    s = mediawiki_add_whitespace_in_front(highlighted_tokenstream)
+
+    print("{{ottr:ErrorMsg|The parser tripped up at %s:%s here: |code=-3}}" % (line, col))
+    print(s)
+
 def main(argv):
     # print(argv)
 
@@ -37,9 +60,13 @@ def main(argv):
         print("{{ottr:ErrorMsg|The string '''%s''' is not one of the defined arguments in the signature|code=-3}" %
               e.args[0])
     except RecognitionException as e:
-        print("{{ottr:ErrorMsg|Parser Error, see above|code=0}}")
+        #print("{{ottr:ErrorMsg|Parser Error, see above|code=0}}")
+        #print("<pre>"+str(e.offendingToken)+"</pre>")
+        debug_str(e)
+
     except Exception as e:
-        traceback.print_exc()
+        #traceback.print_exc()
+        pass
 
 
 def run():
