@@ -4,6 +4,8 @@
 // - rename type nonterminal to otype to avoid conflict with python
 // - add constantList-rule and constantList to constant as an alternative.
 
+// added comment redirection by hand!
+
 grammar stOTTR;
 options {language=Python3;} // Only change in document..
 

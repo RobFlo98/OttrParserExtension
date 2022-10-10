@@ -26,6 +26,7 @@ def mediawiki_highlight(text,word):
 
 
 def debug_str(exception):
+
     token = exception.offendingToken
     tokenstream= token.getInputStream().strdata
     highlighted_tokenstream = mediawiki_highlight(tokenstream,token.text)
@@ -34,13 +35,12 @@ def debug_str(exception):
     line = token.line
     col = token.column
     s = mediawiki_add_whitespace_in_front(highlighted_tokenstream)
-
-    print("{{ottr:ErrorMsg|The parser tripped up at %s:%s here: |code=-3}}" % (line, col))
+    print("{{ottr:ErrorMsg|The parser tripped up at %s:%s here (see bold text): |code=-3}}" % (line, col))
     print(s)
+
 
 def main(argv):
     # print(argv)
-
     try:
         if len(argv) < 2:
             print("<--No second argument for file name that contains ottr data-->")
@@ -56,6 +56,7 @@ def main(argv):
             printer = OTTRToSMWConverter(stream)
             walker = ParseTreeWalker()
             walker.walk(printer, tree)
+
     except KeyError as e:
         print("{{ottr:ErrorMsg|The string '''%s''' is not one of the defined arguments in the signature|code=-3}" %
               e.args[0])
@@ -63,15 +64,18 @@ def main(argv):
         #print("{{ottr:ErrorMsg|Parser Error, see above|code=0}}")
         #print("<pre>"+str(e.offendingToken)+"</pre>")
         debug_str(e)
+        pass
 
     except Exception as e:
-        #traceback.print_exc()
+        traceback.print_exc()
         pass
 
 
 def run():
+
     main(sys.argv)
 
 
 if __name__ == '__main__':
+
     run()

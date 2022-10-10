@@ -212,6 +212,7 @@ class SMWGenerator:
         prefixes = self.produce_prefixes()
         if prefixes:
             print(prefixes)
+            pass
         instances = ""
         template_definitions = ""
         warnings = ""
@@ -240,6 +241,7 @@ class SMWGenerator:
                 produce_forms = True
             if warnings:
                 print(warnings)
+                pass
             template_definitions = self.produce_templates(produce_forms)
             template_definitions = template_definitions
 
@@ -286,7 +288,7 @@ class SMWGenerator:
 
 			{{{standard input|save}}} {{{standard input|preview}}} {{{standard input|changes}}} {{{standard input|cancel}}}
 			""") % (
-                "<pre>"+"".join(self.comments)+"</pre",
+                "<pre>" + "".join(self.comments) + "</pre",
                 "".join([("{{{field|template_%i|holds template}}}" % i) for i in range(1, len(self.definitions) + 1)]),
                 self.definitions[0].signature.template_name)
 
@@ -309,7 +311,6 @@ class SMWGenerator:
                 s = mediawiki_build_template_with_args(template)
 
                 if s:
-
                     s = mediawiki_wrap_if_calldepht(s, 1)
                     print(mediawiki_colorbox('instance assignements', s))
                 ###
@@ -319,15 +320,25 @@ class SMWGenerator:
 
                 # a check if the template is in the template valuespace
                 # and a check if the template name is the same as the page name (without the 'Template:'-/-->Prefix) and throws an error otherwise
+
+
+
+                warning_string = "{{#ifeq: {{FULLPAGENAME}}| %s| |{{ottr:ErrorMsg|Template name and Page name should be the same:<b> %s </b>(Template name) , <b>{{FULLPAGENAME}}</b> (Pagename)|code=-1|type=Warning}} }}" \
+                           " </noinclude>" % (upper_template_name,upper_template_name)
+
+
+
+
+
                 return (("<noinclude>"
 
                          "{{#ifexpr: %s ||%s}}" % (mediawiki_generate_template_query(), wrong_namespace_warning_text)
 
-                         + "{{#ifeq:{{#sub:{{FULLPAGENAME}}|9}}|%s||{{ottr:ErrorMsg|Template name and Page name should be the same:<b> %s </b>(Template name) , <b>{{FULLPAGENAME}}</b> (Pagename)|code=-1|type=Warning}}}}"
-                           " </noinclude>" % (upper_template_name, upper_template_name))
+                         + warning_string)
                         + (
-                                "<noinclude>{{#ifexpr: {{ottr:DisplayFormHelp}}|%s|}}</noinclude>" % template.get_form_help_str(self.comments) )
-                +'<pre>'+'\n\n'.join(self.comments)+'</pre>'
+                                "<noinclude>{{#ifexpr: {{ottr:DisplayFormHelp}}|%s|}}</noinclude>" % template.get_form_help_str(
+                            self.comments))
+                        + '\n ' + '\n '.join(self.comments)
                         + "<includeonly>"
                         + template.get_smw_repr(smw_context) + "</includeonly><noinclude>"
                         + f"\nExisting Instances: {{{{#ask:\
