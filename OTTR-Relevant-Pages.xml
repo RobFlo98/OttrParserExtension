@@ -38,6 +38,49 @@
     </namespaces>
   </siteinfo>
   <page>
+<title>Template:Colored box</title>
+<ns>10</ns>
+<id>99</id>
+<revision>
+<id>358</id>
+<parentid>335</parentid>
+<timestamp>2022-06-01T16:17:00Z</timestamp>
+<contributor>
+<username>Oliver Tautz</username>
+<id>1</id>
+</contributor>
+<origin>358</origin>
+<model>wikitext</model>
+<format>text/x-wiki</format>
+<text bytes="1014" sha1="9vx1oe0ku1wpxr4anka1rfyn9dfub7e" xml:space="preserve">
+__NOEDITSECTION__ __NOTOC__<div style="clear: both;"></div> <div style="border: 1px solid {{{border|#99c}}};<!-- -->background: {{{titlebackground|#ccf}}};<!-- -->color: {{{titleforeground|#000}}};<!-- -->padding: 0.1em;<!-- -->text-align: center;<!-- -->font-weight: bold;<!-- -->font-size: 100%;<!-- -->margin-bottom: 0px;<!-- -->border-bottom: none;<!-- -->border-radius: 1.5em 1.5em 0 0;<!-- -->{{{titlestyle|}}};"><!-- --><!-- --><h2 style="font-size:100%;font-weight:bold;border: none; margin: 0; padding:0; padding-bottom:.1em;"><span style="color:{{{titleforeground|#000000}}}">{{{title}}}</span></h2></div> <div style="display: block; border: 1px solid {{{border|#99c}}}; vertical-align: top; background: {{{background|#fff}}}; color: {{{foreground|#000}}}; margin-bottom: 10px; padding: .8em 1em 1em 1.3em; margin-top: 0em; border-radius: 0 0 1.5em 1.5em; {{{style|}}};">{{{1|{{{text|{{{content}}}}}}}}}</div>
+</text>
+<sha1>9vx1oe0ku1wpxr4anka1rfyn9dfub7e</sha1>
+</revision>
+</page>
+<page>
+<title>Template:Highlight</title>
+<ns>10</ns>
+<id>97</id>
+<revision>
+<id>320</id>
+<timestamp>2022-05-05T12:23:17Z</timestamp>
+<contributor>
+<ip>127.0.0.1</ip>
+</contributor>
+<comment>
+Created page with "<span style="background-color:{{{2|yellow}}}">{{{1}}}</span>"
+</comment>
+<origin>320</origin>
+<model>wikitext</model>
+<format>text/x-wiki</format>
+<text bytes="60" sha1="lulb4tjx8sejqw955cetbme5hqls4ci" xml:space="preserve">
+<span style="background-color:{{{2|yellow}}}">{{{1}}}</span>
+</text>
+<sha1>lulb4tjx8sejqw955cetbme5hqls4ci</sha1>
+</revision>
+</page>
+  <page>
     <title>Ottr:Documentation</title>
     <ns>0</ns>
     <id>453</id>
