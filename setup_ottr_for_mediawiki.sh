@@ -30,6 +30,7 @@ Help()
    echo "h     Print this Help."
    echo "p     use explicit python/conda binary instead of the one on PATH"
    echo "c     use conda instead of pip. Not implemented ..."
+   echo "a     dont prompt and use standard behavioer ... useful if running in automated skript."
 }
 
 
@@ -37,13 +38,17 @@ pythonpath="python"
 envpath="ottr_env"
 setuppath="."
 use_conda=false
+autoinst=false
 shellname=bash
+
 #Help
-while getopts ":hcp:e:s:" option; do
+while getopts ":hcpa:e:s:" option; do
    case $option in
       h) # display Help
           Help
           exit;;
+      a) 
+          autoinst=true;;
       p)
           pythonpath=$OPTARG;;
       i)
@@ -58,23 +63,28 @@ while getopts ":hcp:e:s:" option; do
         exit;;
    esac
 done
+if [ "$autoinst" = false ]; then 
+   while true; do
 
-while true; do
-   read -p  "Setup and install ottrparser into new environment at $envpath ? [Y/N]" yn
-   case $yn in
-   [Yy]* ) 
-           if [ "$use_conda" = true ] ; then
-              $pythonpath create -p $envpath
-              $pythonpath activate $envpath
-              $pythonpath install pip
-              pip install .
-           else 
-              $pythonpath -m venv $envpath
-              $envpath/bin/python -m pip install $setuppath; 
-           fi
-           break;; 
-   [Nn]* ) exit;;
-   * ) echo "Please anser yes or no";;
-   esac
-done
+      read -p  "Setup and install ottrparser into new environment at $envpath ? [Y/N]" yn
+      case $yn in
+      [Yy]* ) 
+              if [ "$use_conda" = true ] ; then
+                 $pythonpath create -p $envpath
+                 $pythonpath activate $envpath
+                 $pythonpath install pip
+                 pip install .
+              else 
+                 $pythonpath -m venv $envpath
+                 $envpath/bin/python -m pip install $setuppath; 
+              fi
+              break;; 
+      [Nn]* ) exit;;
+      * ) echo "Please anser yes or no";;
+      esac
+   done
+else
+   $pythonpath -m venv $envpath
+   $envpath/bin/python -m pip install $setuppath; 
+fi
 
