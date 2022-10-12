@@ -11,6 +11,7 @@ class OttrParserExtension {
 	public static function renderOttrTag( $input, array $args, Parser $parser, PPFrame $frame ) {
 		$filename = './'. uniqid() . '.txt';
         file_put_contents($filename, $input, LOCK_EX);
+		           // replace this string if you want to use a different python environment
 		$command = 'extensions/OttrParserExtension/ottr_env/bin/ottrToSMW ' . $filename . " 2>&1";
 		$code = shell_exec($command);
 		$deleted = unlink($filename);
@@ -34,6 +35,7 @@ class OttrParserExtension {
 		}
 		$filename = './' . uniqid() . '.txt';
 		file_put_contents($filename, $input, LOCK_EX);
+		           // replace this string if you want to use a different python environment
 		$command = 'extensions/OttrParserExtension/ottr_env/bin/ottrToSMW ' . $filename . " 2>&1";
 		$code = shell_exec($command);
 		$deleted = unlink($filename);
