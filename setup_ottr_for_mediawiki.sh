@@ -42,7 +42,7 @@ autoinst=false
 shellname=bash
 
 #Help
-while getopts ":hcpa:e:s:" option; do
+while getopts ":hacp:e:s:" option; do
    case $option in
       h) # display Help
           Help
