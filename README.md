@@ -17,7 +17,7 @@ In the [Settings.py](Settings.py) you can add your namespaces, that are used in 
 
 ## Development
 
-In deployment hhe extension uses the [includes/Hooks.php](includes/Hooks.php). It calls the python script [printOttrInSmw.py](includes/ottrToSmwPython/printOttrInSmw.py) from an installed python environment. You should use [setup_ottr_for_mediawiki.sh](setup_ottr_for_mediawiki.sh) for setting it up.
+In deployment the extension uses the [includes/Hooks.php](includes/Hooks.php). It calls the python script [printOttrInSmw.py](includes/ottrToSmwPython/printOttrInSmw.py) from an installed python environment. You should use [setup_ottr_for_mediawiki.sh](setup_ottr_for_mediawiki.sh) for setting it up.
 If you want to further develop this extension, it is advised to change the [includes/Hooks.php](includes/Hooks.php) such that it uses a direct python call without the installation as it is easier to test changes this way. 
 
 All relevant source code can be found in [includes/ottrToSmwPython](includes/ottrToSmwPython). The script parses the text in the passed file and the Listener ([OTTRToSMWConverter.py](includes/OttrToSmwPython/OTTRToSMWConverter.py)) builds class objects (from the [OTTRClassesForSMW.py](includes/OttrToSmwPython/OTTRClassesForSMW.py)) related to the parsed text. 
