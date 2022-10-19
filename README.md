@@ -4,14 +4,17 @@ An extension for the ([Semantic](https://www.semantic-mediawiki.org/wiki/Semanti
 
 The help page for wiki usage: https://www.mediawiki.org/wiki/Help:Extension:OttrParser.
 
-## Installation
-See Media Wiki page of the extension: [Install Instructions](https://www.mediawiki.org/wiki/Extension:OttrParser#Installation).
 
-## Pages as XML
-The [OTTR-Relevant-Pages.xml](OTTR-Relevant-Pages.xml) contains the data for the relevant pages and templates, that are part of the extension. Import them via the Special Page Import. (Special:Import)
+## Manual installation in existing mediawiki
+If you have an existing mediawiki or need a specific setup you probably want to install the extension manually.
+In that case see Media Wiki page of the extension: [Install Instructions](https://www.mediawiki.org/wiki/Extension:OttrParser#Installation).
 
-## Settings.py
-In the [Settings.py](Settings.py) you can add your namespaces, that are used in the automated forms, for requested arguments with the type restriction `ottr:IRI`.
+## Full Semantic Media Wiki install with Docker
+
+If you want to setup a new mediawiki with the extention you might want to use our docker image instead.
+A Docker image of the Semantic Media Wiki with the OttrParserExtension and installation instructions are provided [here](https://hub.docker.com/repository/docker/otautz/ottr-smw)
+
+
 
 ## Development
 
@@ -36,6 +39,8 @@ CommentBlock
  : '/***' .*? '***/' -> channel(HIDDEN)
  ;
 ```
+
+In the [Settings.py](Settings.py) you can add your namespaces, that are used in the automated forms, for requested arguments with the type restriction `ottr:IRI`.
 
 
 
