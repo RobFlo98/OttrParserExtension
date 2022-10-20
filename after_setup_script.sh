@@ -36,7 +36,7 @@ MEDIAWIKI_VOLUME_NAME='wikiroot'
   exit 2
 }
 
-PARSED_ARGUMENTS=$(getopt -a -n setup -o '' --long localsettings-path:,mediawiki-container:,mediawiki-volume: -- "$@")
+PARSED_ARGUMENTS=$(getopt -a setup -o '' --long localsettings-path:,mediawiki-container:,mediawiki-volume: -- "$@")
 VALID_ARGUMENTS=$?
 if [ "$VALID_ARGUMENTS" != "0" ]; then
   usage
