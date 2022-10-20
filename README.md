@@ -12,7 +12,7 @@ In that case see Media Wiki page of the extension: [Install Instructions](https:
 ## Full Semantic Media Wiki install with Docker
 
 If you want to setup a new mediawiki with the extention you might want to use our docker image instead.
-A [Docker image](https://hub.docker.com/repository/docker/otautz/ottr-smw) of the Semantic Media Wiki with the OttrParserExtension and installation instructions are provided.
+A [Docker image](https://hub.docker.com/r/otautz/ottr-smw) of the Semantic Media Wiki with the OttrParserExtension and installation instructions are provided.
 
 
 
