@@ -22,14 +22,13 @@
 set -o nounset                                  # Treat unset variables as an error
 
 
-#!/bin/bash
 
 #### PARSE ARGS ####
 
 
-MEDIAWIKI_CONTAINER_NAME='some-mediawiki'
+MEDIAWIKI_CONTAINER_NAME='OTTRWIKI'
 LOCALSETTINGS_PATH='LocalSettings.php'
-MEDIAWIKI_VOLUME_NAME='wikiroot'
+MEDIAWIKI_VOLUME_NAME='WIKIVOLUME'
  
  usage()
 {
@@ -37,7 +36,7 @@ MEDIAWIKI_VOLUME_NAME='wikiroot'
   exit 2
 }
 
-PARSED_ARGUMENTS=$(getopt -a -n setup -o '' --long localsettings-path:,mediawiki-container:,mediawiki-volume: -- "$@")
+PARSED_ARGUMENTS=$(getopt -a setup -o '' --long localsettings-path:,mediawiki-container:,mediawiki-volume: -- "$@")
 VALID_ARGUMENTS=$?
 if [ "$VALID_ARGUMENTS" != "0" ]; then
   usage

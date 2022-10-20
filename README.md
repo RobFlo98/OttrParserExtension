@@ -2,18 +2,19 @@
 
 An extension for the ([Semantic](https://www.semantic-mediawiki.org/wiki/Semantic_MediaWiki)) [Media Wiki](https://www.mediawiki.org/wiki/MediaWiki). It parses text in the [OTTR template language](https://ottr.xyz/) and produces code in Media Wiki Syntax. Triples are represented as subobjects.
 
-More information about the extension **and how to install**: https://www.mediawiki.org/wiki/Extension:OttrParser.
-
 The help page for wiki usage: https://www.mediawiki.org/wiki/Help:Extension:OttrParser.
 
-## Installation
-See Media Wiki page of the extension: [Install Instructions](https://www.mediawiki.org/wiki/Extension:OttrParser#Installation).
 
-## Pages as XML
-The [OTTR-Relevant-Pages.xml](OTTR-Relevant-Pages.xml) contains the data for the relevant pages and templates, that are part of the extension. Import them via the Special Page Import. (Special:Import)
+## Manual installation in existing mediawiki
+If you have an existing mediawiki or need a specific setup you probably want to install the extension manually.
+In that case see Media Wiki page of the extension: [Install Instructions](https://www.mediawiki.org/wiki/Extension:OttrParser#Installation).
 
-## Settings.py
-In the [Settings.py](Settings.py) you can add your namespaces, that are used in the automated forms, for requested arguments with the type restriction `ottr:IRI`.
+## Full Semantic Media Wiki install with Docker
+
+If you want to setup a new mediawiki with the extention you might want to use our docker image instead.
+A [Docker image](https://hub.docker.com/r/otautz/ottr-smw) of the Semantic Media Wiki with the OttrParserExtension and installation instructions are provided.
+
+
 
 ## Development
 
@@ -38,6 +39,8 @@ CommentBlock
  : '/***' .*? '***/' -> channel(HIDDEN)
  ;
 ```
+
+In the [Settings.py](Settings.py) you can add your namespaces, that are used in the automated forms, for requested arguments with the type restriction `ottr:IRI`.
 
 
 
