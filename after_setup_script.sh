@@ -26,9 +26,9 @@ set -o nounset                                  # Treat unset variables as an er
 #### PARSE ARGS ####
 
 
-MEDIAWIKI_CONTAINER_NAME='some-mediawiki'
+MEDIAWIKI_CONTAINER_NAME='OTTRWIKI'
 LOCALSETTINGS_PATH='LocalSettings.php'
-MEDIAWIKI_VOLUME_NAME='wikiroot'
+MEDIAWIKI_VOLUME_NAME='WIKIVOLUME'
  
  usage()
 {
