@@ -30,7 +30,34 @@ MEDIAWIKI_CONTAINER_NAME='OTTRWIKI'
 LOCALSETTINGS_PATH='LocalSettings.php'
 MEDIAWIKI_VOLUME_NAME='WIKIVOLUME'
 LOCALSETTINGS_PATH_TMP='/tmp/LocalSettings.php_tmp' 
- usage()
+
+ADD_TO_LOCALSETTINGS='########### Added by OTTRParser after_setup_script ###########
+#SMW include 
+wfLoadExtension( 'SemanticMediaWiki' );
+enableSemantics( 'localhost/mediawiki-1.37.1' );
+
+# OTTR extension
+
+wfLoadExtension( 'OttrParserExtension' );
+# OTTR extension dependencies
+
+wfLoadExtension( 'ParserFunctions' );
+$wgPFEnableStringFunctions = true;
+wfLoadExtension( 'Loops' );
+wfLoadExtension( 'Arrays' );
+wfLoadExtension( 'PageForms' );
+wfLoadExtension( 'InputBox' );
+wfLoadExtension( 'Variables' );
+
+require_once "$IP/extensions/AutoCreatePage/AutoCreatePage.php";
+
+# This surpresses some warnings ..
+$wgDeprecationReleaseLimit = '1.x';
+
+########### Added by OTTRParser after_setup_script ###########'
+
+
+usage()
 {
   echo  "Usage setup [--localsettings-path LOCALSETTINGS_PATH] [--mediawiki-container MEDIAWIKI_CONTAINER_NAME] [--mediawiki-volume MEDIAWIKI_VOLUME_NAME]"
   exit 2
@@ -146,7 +173,7 @@ fi
 
 # add some lines to Localsettings (activate extensions)
 cp $LOCALSETTINGS_PATH $LOCALSETTINGS_PATH_TMP
-cat add_to_localsettings.php >> $LOCALSETTINGS_PATH_TMP
+echo $ADD_TO_LOCALSETTINGS >> $LOCALSETTINGS_PATH_TMP
 
 # copy LocalSettings.php to volume
 docker cp $LOCALSETTINGS_PATH_TMP "$MEDIAWIKI_CONTAINER_NAME:/var/www/html/LocalSettings.php"
