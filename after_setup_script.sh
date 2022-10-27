@@ -8,14 +8,14 @@
 #   DESCRIPTION: A simple script calling some docker and mediawiki funtions to 
 #                finisch up after manual setup. 
 #
-#       OPTIONS: 
+#       OPTIONS: -s, -c 
 #  REQUIREMENTS: getopt
 #          BUGS: ---
 #         NOTES: ---
 #        AUTHOR: Oliver Tautz, 
 #  ORGANIZATION: Bielefeld University
 #       CREATED: 10/19/2022 03:41:31 PM
-#      REVISION: 0.1
+#      REVISION: 0.1.1
 #===============================================================================
 
 
@@ -59,7 +59,7 @@ $wgDeprecationReleaseLimit = '1.x';
 
 usage()
 {
-  echo  "Usage setup [--localsettings-path LOCALSETTINGS_PATH] [--mediawiki-container MEDIAWIKI_CONTAINER_NAME] [--mediawiki-volume MEDIAWIKI_VOLUME_NAME]"
+  echo  "Usage setup [-s LOCALSETTINGS_PATH] [-c MEDIAWIKI_CONTAINER_NAME] "
   exit 2
 }
 
@@ -71,9 +71,7 @@ while getopts "s:c:v:" o; do
         c)
             MEDIAWIKI_CONTAINER_NAME=${OPTARG}
             ;;
-        v)
-            MEDIAWIKI_VOLUME_NAME=${OPTARG}
-            ;;
+
         *)
             usage
             ;;
@@ -168,8 +166,6 @@ fi
 
 
 ####Do things :)####
-
-# remove quotes
 
 # add some lines to Localsettings (activate extensions)
 cp $LOCALSETTINGS_PATH $LOCALSETTINGS_PATH_TMP
