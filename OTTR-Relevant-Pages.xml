@@ -1774,4 +1774,22 @@ preloadparams[]=n instance
       <sha1>800cuwyc3l2cg7i2znjx3i2wv9sji38</sha1>
     </revision>
   </page>
+  <page>
+    <title>Template:Exists</title>
+    <ns>10</ns>
+    <id>359</id>
+    <revision>
+      <id>2095</id>
+      <timestamp>2021-08-25T13:58:22Z</timestamp>
+      <contributor>
+        <username>Florian Schröder</username>
+        <id>23</id>
+      </contributor>
+      <comment>Created page with "&lt;includeonly&gt;{{#ifeq:{{anchorencode:{{lc:[[:{{{page|{{{1|defaultFalse}}}}}}]]}}}}|{{anchorencode:{{lc:{{:{{{page|{{{1|defaultFalse}}}}}}}}}}}}|{{{else|0}}}|{{{then|1}}}}}&lt;/inc..."</comment>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+      <text xml:space="preserve" bytes="184">&lt;includeonly&gt;{{#ifeq:{{anchorencode:{{lc:[[:{{{page|{{{1|defaultFalse}}}}}}]]}}}}|{{anchorencode:{{lc:{{:{{{page|{{{1|defaultFalse}}}}}}}}}}}}|{{{else|0}}}|{{{then|1}}}}}&lt;/includeonly&gt;</text>
+      <sha1>po3bc0hoztheuhfh23jafbfs2qcxqgi</sha1>
+    </revision>
+  </page>
 </mediawiki>
