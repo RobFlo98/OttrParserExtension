@@ -144,7 +144,7 @@ fi
 
 # add some lines to Localsettings (activate extensions)
 cp $LOCALSETTINGS_PATH $LOCALSETTINGS_PATH_TMP
-echo "$ADD_TO_LOCALSETTINGS" >> $LOCALSETTINGS_PATH_TMP
+cat add_to_localsettings.php >> $LOCALSETTINGS_PATH_TMP
 
 # copy LocalSettings.php to volume
 docker cp $LOCALSETTINGS_PATH_TMP "$MEDIAWIKI_CONTAINER_NAME:/var/www/html/LocalSettings.php"
