@@ -31,32 +31,6 @@ LOCALSETTINGS_PATH='LocalSettings.php'
 MEDIAWIKI_VOLUME_NAME='WIKIVOLUME'
 LOCALSETTINGS_PATH_TMP='/tmp/LocalSettings.php_tmp' 
 
-ADD_TO_LOCALSETTINGS='########### Added by OTTRParser after_setup_script ###########
-#SMW include 
-wfLoadExtension( 'SemanticMediaWiki' );
-enableSemantics( 'localhost/mediawiki-1.37.1' );
-
-# OTTR extension
-
-wfLoadExtension( 'OttrParserExtension' );
-# OTTR extension dependencies
-
-wfLoadExtension( 'ParserFunctions' );
-$wgPFEnableStringFunctions = true;
-wfLoadExtension( 'Loops' );
-wfLoadExtension( 'Arrays' );
-wfLoadExtension( 'PageForms' );
-wfLoadExtension( 'InputBox' );
-wfLoadExtension( 'Variables' );
-
-require_once "$IP/extensions/AutoCreatePage/AutoCreatePage.php";
-
-# This surpresses some warnings ..
-$wgDeprecationReleaseLimit = '1.x';
-
-########### Added by OTTRParser after_setup_script ###########'
-
-
 usage()
 {
   echo  "Usage setup [-s LOCALSETTINGS_PATH] [-c MEDIAWIKI_CONTAINER_NAME] "
@@ -149,8 +123,9 @@ fi
 if [[ ! -f "$LOCALSETTINGS_PATH" ]] ; then
     read -p "$LOCALSETTINGS_PATH not found! Do you want to search for it in your home folder?[y/n]" yn
     case $yn in
-        [Yy]* ) found=$(find /home -name LocalSettings.php -print -quit 2>/dev/null);
-                if [ -z "$found" ]; then
+        [Yy]* ) found=$(find /home -name LocalSettings.php -print -quit -not -path ':/.*' -maxdepth 3  2>/dev/null);
+                echo $found
+                if [ $? -ne 0 ]; then
                     echo "No LocalSettings.php found in your home! Please restart this script with the -s option pointing to your file."
                     exit
                 else
@@ -176,6 +151,7 @@ docker cp $LOCALSETTINGS_PATH_TMP "$MEDIAWIKI_CONTAINER_NAME:/var/www/html/Local
 
 
 # update database for smw to function ...
-docker exec -t $MEDIAWIKI_CONTAINER_NAME php maintenance/update.php
+docker exec $MEDIAWIKI_CONTAINER_NAME php maintenance/update.php
 
+docker exec $MEDIAWIKI_CONTAINER_NAME php maintenance/importDump.php < extensions/OttrParserExtension/OTTR-Relevant-Pages.xml
 
