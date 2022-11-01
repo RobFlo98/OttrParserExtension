@@ -143,15 +143,24 @@ fi
 ####Do things :)####
 
 # add some lines to Localsettings (activate extensions)
+echo 'copy LocalSettings.php to /tmp.'
 cp $LOCALSETTINGS_PATH $LOCALSETTINGS_PATH_TMP
 cat add_to_localsettings.php >> $LOCALSETTINGS_PATH_TMP
 
+
 # copy LocalSettings.php to volume
+echo 'copy modified LocalSettings/php to docker Container.'
 docker cp $LOCALSETTINGS_PATH_TMP "$MEDIAWIKI_CONTAINER_NAME:/var/www/html/LocalSettings.php"
 
 
 # update database for smw to function ...
+echo 'running update.php ...'
 docker exec $MEDIAWIKI_CONTAINER_NAME php maintenance/update.php
+echo 'done running update.php ...'
 
-docker exec $MEDIAWIKI_CONTAINER_NAME php maintenance/importDump.php < extensions/OttrParserExtension/OTTR-Relevant-Pages.xml
+
+# import ottr xml pages
+echo 'importing ottr pages from xml...'
+docker exec $MEDIAWIKI_CONTAINER_NAME php maintenance/importDump.php extensions/OttrParserExtension/OTTR-Relevant-Pages.xml
+echo 'done importing ottr pages from xml'
 
