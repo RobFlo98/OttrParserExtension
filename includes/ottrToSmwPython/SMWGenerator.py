@@ -338,7 +338,7 @@ class SMWGenerator:
                         + (
                                 "<noinclude>{{#ifexpr: {{ottr:DisplayFormHelp}}|%s|}}</noinclude>" % template.get_form_help_str(
                             self.comments))
-                        + '\n ' + '\n '.join(self.comments)
+                        + '<pre>'+'\n'.join(self.comments)+ '</pre>'
                         + "<includeonly>"
                         + template.get_smw_repr(smw_context) + "</includeonly><noinclude>"
                         + f"\nExisting Instances: {{{{#ask:\
