@@ -2,7 +2,8 @@
 	"name": "OttrParserExtension",
 	"version": "0.1.0-beta",
 	"author": [
-		"Florian Schröder"
+		"Florian Schröder",
+		"Oliver Tautz"
 	],
 	"url": "https://www.mediawiki.org/wiki/Extension:OttrParser",
 	"descriptionmsg": "ottr_parser_extension-desc",
