@@ -21,18 +21,30 @@
 		}
 	},
 	"AutoloadClasses": {
-		"OttrParserExtension": "includes/Hooks.php"
+		"OttrParserExtension": "includes/Hooks.php",
+        "SpecialOttrSettings": "includes/specialPages/OttrSettings.php"
 	},
+    "SpecialPages": {
+    "OttrSettings": {
+      "class": "SpecialOttrSettings"
+    }
+    },
+
 	"Hooks": {
 		"ParserFirstCallInit": "OttrParserExtension::onParserFirstCallInit"
 	},
 	"ExtensionMessagesFiles": {
-		"OttrParserExtensionMagic": "OttrParserExtension.i18n.php"
-	},
+		"OttrParserExtensionMagic": "OttrParserExtension.i18n.php",
+	    "OttrSettingsAlias": "i18n/special_pages/OttrSettings.i18n.alias.php"
+    },
 	"MessagesDirs": {
 		"OttrParserExtension": [
 			"i18n"
-		]
-	},
+		],
+  "OttrSettings": [
+      "i18n/special_pages/ottrsettings"
+    ]
+
+    },
 	"manifest_version": 2
 }

@@ -1,0 +1,16 @@
+{
+	"@metadata": {
+		"authors": [
+			"<your username>"
+		]
+	},
+	"myextension": "My Extension",
+	"myextension-desc": "Adds the MyExtension functionality.",
+	"myextension-summary": "On this special page, do this simple thing and earn wonders.",
+	"group-myextensionrole": "Role of myextension",
+	"group-myextensionrole-member": "Member of role of myextension",
+	"grouppage-myextensionrole": "{{ns:project}}:Role of myextension",
+	"action-myextension": "XYZ doing.",
+	"right-myextension": "to do xyz"
+}
+
