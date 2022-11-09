@@ -1,7 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"Florian Schröder"
+			"Florian Schröder",
+            "Oliver Tautz"
 		]
 	},
 	"ottr_parser_extension-desc": "Parse OTTR statements and produce wiki code for it."

@@ -1,7 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"Florian Schröder"
+			"Florian Schröder",
+            "Oliver Tautz"
 		]
 	},
 	"ottr_parser_extension-desc": "{{desc|name=OttrParser|url=https://www.mediawiki.org/wiki/Extension:OttrParser}}"
