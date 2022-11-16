@@ -22,11 +22,14 @@
 	},
 	"AutoloadClasses": {
 		"OttrParserExtension": "includes/Hooks.php",
-        "SpecialOttrSettings": "includes/specialPages/OttrSettings.php"
+        "SpecialOttrSettings": "includes/specialPages/OttrSettings.php",
+        "SpecialOttrPages":"includes/specialPages/OttrPages.php"
 	},
     "SpecialPages": {
     "OttrSettings": {
       "class": "SpecialOttrSettings"
+    },"OttrPages": {
+      "class": "SpecialOttrPages"
     }
     },
 
@@ -35,7 +38,8 @@
 	},
 	"ExtensionMessagesFiles": {
 		"OttrParserExtensionMagic": "OttrParserExtension.i18n.php",
-	    "OttrSettingsAlias": "i18n/special_pages/OttrSettings.i18n.alias.php"
+	    "OttrSettingsAlias": "i18n/special_pages/OttrSettings.i18n.alias.php",
+	    "OttrPagesAlias": "i18n/special_pages/OttrPages.i18n.alias.php"
     },
 	"MessagesDirs": {
 		"OttrParserExtension": [
@@ -43,6 +47,9 @@
 		],
   "OttrSettings": [
       "i18n/special_pages/ottrsettings"
+    ],
+  "OttrPages": [
+      "i18n/special_pages/ottrpages"
     ]
 
     },
