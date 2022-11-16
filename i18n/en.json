@@ -5,5 +5,7 @@
             "Oliver Tautz"
 		]
 	},
-	"ottr_parser_extension-desc": "Parse OTTR statements and produce wiki code for it."
+	"ottr_parser_extension-desc": "Parse OTTR statements and produce wiki code for it.",
+    "specialpages-group-ottr": "Ottr Parser Pages"
+
 }
