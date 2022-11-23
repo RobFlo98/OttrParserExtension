@@ -67,6 +67,12 @@ class DELIMITERS:
     POSSIBLE_TYPES_SPLIT = "§"
 
 
+def get_namespaces():
+    if Settings.ottr_template_namespaces:
+        return ','+','.join(Settings.ottr_template_namespaces)
+    else:
+        return ''
+
 def get_input_type_of_ottr_type(type):
     if type is not None:
 
@@ -74,8 +80,8 @@ def get_input_type_of_ottr_type(type):
             if type.type_value == "ottr:IRI" or type.type_value.lower().startswith(
                     "dpm:") or type.type_value.lower().startswith("pmdco:") or type.type_value.lower().startswith(
                     "emmo:"):
-                # "combobox|values from namespace=Main,Dpm,Template"
-                return "combobox|values from category=Dpm", ''# + ",".join(Settings.Default_Namespaces), ''
+                return  "combobox|values from namespace=Main,Template" + get_namespaces(), ""
+                #return "combobox|values from category=Dpm", ''# + ",".join(Settings.Default_Namespaces), ''
             if type.type_value == "xsd:boolean":
                 return "dropdown|values=\"true\"^^xsd:boolean,\"false\"^xsd:boolean", ''
             if type.type_value == "xsd:string":

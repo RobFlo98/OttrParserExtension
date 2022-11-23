@@ -264,6 +264,15 @@ class SMWGenerator:
 
     def produce_templates(self, produce_form):
         form_string = ""
+
+
+        def wrap_comments():
+            if self.comments:
+                comms = [f" {x.strip()}" for x in self.comments]
+                comms = "\n".join(comms)
+                return f"\n{comms}"
+            else:
+                return ""
         if produce_form:
             # all forms are multi instances with multi templates (brought about by more than one template signature in the input)
             form_string = textwrap.dedent("""\
@@ -288,7 +297,7 @@ class SMWGenerator:
 
 			{{{standard input|save}}} {{{standard input|preview}}} {{{standard input|changes}}} {{{standard input|cancel}}}
 			""") % (
-                "<pre>" + "".join(self.comments) + "</pre",
+                wrap_comments(),
                 "".join([("{{{field|template_%i|holds template}}}" % i) for i in range(1, len(self.definitions) + 1)]),
                 self.definitions[0].signature.template_name)
 
@@ -338,7 +347,7 @@ class SMWGenerator:
                         + (
                                 "<noinclude>{{#ifexpr: {{ottr:DisplayFormHelp}}|%s|}}</noinclude>" % template.get_form_help_str(
                             self.comments))
-                        + '<pre>'+'\n'.join(self.comments)+ '</pre>'
+                        +  wrap_comments()
                         + "<includeonly>"
                         + template.get_smw_repr(smw_context) + "</includeonly><noinclude>"
                         + f"\nExisting Instances: {{{{#ask:\
