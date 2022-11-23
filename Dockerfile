@@ -1,4 +1,4 @@
-from mediawiki:1.37.1
+from mediawiki:1.34.2
 # install needed apt packages
 RUN apt-get clean && apt-get update && apt-get install -y wget unzip zip sqlite3 python3-venv
 
