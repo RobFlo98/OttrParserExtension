@@ -6,7 +6,11 @@ with open("README.md") as f:
     long_description = f.read()
 
 install_requires = [
-        "antlr4-python3-runtime==4.7.2"
+        "antlr4-python3-runtime==4.7.2",
+        "Flask==2.2.2",
+        "flask-restx==1.0.3",
+        "defusedxml==0.7.1"
+
         ]
 setup(
     name="ottrToSmwPython",
