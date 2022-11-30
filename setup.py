@@ -9,7 +9,8 @@ install_requires = [
         "antlr4-python3-runtime==4.7.2",
         "Flask==2.2.2",
         "flask-restx==1.0.3",
-        "defusedxml==0.7.1"
+        "defusedxml==0.7.1",
+        "requests==2.28.1"
 
         ]
 setup(
