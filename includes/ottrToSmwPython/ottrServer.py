@@ -24,7 +24,8 @@ api = Api(app, version='0.1', title='OttrApi',
           description='An api to interact with the Otter-SemanticMediaWiki.',
           )
 
-ottr_namespace_server = api.namespace('ottr_server', description="Server related functions, e.g. change server settings and ping to see if it is up")
+ottr_namespace_server = api.namespace('ottr_server',
+                                      description="Server related functions, e.g. change server settings and ping to see if it is up")
 ottr_namespace_get = api.namespace('ottr_get', description="request .stottr files from the wiki.")
 ottr_namespace_post = api.namespace('ottr_post', description="post your .stottr files into the wiki.")
 
@@ -40,7 +41,6 @@ stottr_file = api.model('stottr_input_file', {
                                 description='Overwrite existing pages. If this is set to False only new pages will be created. Prefixes are added regardless'),
 
 })
-
 
 stottr_output = api.model('stottr_output', {
     'templates': fields.String(description="templates from wiki parsed to .stottr syntax."),
@@ -192,10 +192,9 @@ class get_stottr_prefixes(Resource):
         DATA = R.json()
         wikitext = DATA['query']['pages'][list(DATA['query']['pages'].keys())[0]]['revisions'][0]['*']
 
-        prefixes, _  = parse_stottr_string(wikitext)
+        prefixes, _ = parse_stottr_string(wikitext)
 
-
-        return jsonify({'templates':None,'instances':None,'prefixes':''.join(prefixes)})
+        return jsonify({'templates': None, 'instances': None, 'prefixes': ''.join(prefixes)})
 
 
 @ottr_namespace_get.route("/api/get_all", methods=['GET'])
@@ -221,10 +220,9 @@ class get_stottr_all(Resource):
         instances_json = instance_class.get().json
         prefix_json = prefix_class.get().json
 
-
-
         return jsonify(
-            {'templates': templates_json['templates'], 'instances': instances_json['instances'], 'prefixes': prefix_json['prefixes']})
+            {'templates': templates_json['templates'], 'instances': instances_json['instances'],
+             'prefixes': prefix_json['prefixes']})
 
 
 @ottr_namespace_post.route("/api/stottr_file", methods=['POST'])
@@ -302,15 +300,14 @@ class stottr_file(Resource):
         things = instances + templates
 
         pages = edit_or_create_page(mediawiki_url=server_cfg['wikiurl'], titles=titles,
-                            texts=things,
-                            bot_user_name=server_cfg['bot_user_name'],
-                            bot_user_password=server_cfg['bot_user_password'],
-                            append=False, create_only=not overwrite)
+                                    texts=things,
+                                    bot_user_name=server_cfg['bot_user_name'],
+                                    bot_user_password=server_cfg['bot_user_password'],
+                                    append=False, create_only=not overwrite)
 
         prefix_edit = append_to_prefixes(prefixes=prefixes, mediawiki_url=server_cfg['wikiurl'],
-                           bot_user_name=server_cfg['bot_user_name'],
-                           bot_user_password=server_cfg['bot_user_password'])
-
+                                         bot_user_name=server_cfg['bot_user_name'],
+                                         bot_user_password=server_cfg['bot_user_password'])
 
         return "Created Stottr Pages Sucessfully", 201
 
@@ -323,12 +320,25 @@ if __name__ == '__main__':
     # TODO implement choose port
     # TODO implement argparse etc.
 
+    parser = argparse.ArgumentParser(
+        prog='OttrServer',
+        description='An api to send and receive .stottr files to and from mediawiki with OttrParserExtension')
+    parser.add_argument('--config', type=str, default="ottrServerExampleConfig.cfg",
+                        help="path to config file. Copy example and change values as desired.")
+
+    args = parser.parse_args()
+
+    if not Path(args.config).is_file():
+        logging.critical("Config path does not exist!")
+        exit(-1)
+
     try:
         server_cfg = _parse_config(
-            '/srv/http/mediawiki-1.37.1/extensions/OttrParserExtension/includes/ottrToSmwPython/ottrServerExampleConfig.cfg')
+            args.config)
 
         logging.basicConfig(filename=server_cfg['logfile_path'], encoding='utf-8', level=logging.DEBUG, filemode='a')
         logging.info(f" ----- Config parsed sucessfully :) Starting Server at {datetime.now()} ----- ")
+
 
 
     except KeyError as key:

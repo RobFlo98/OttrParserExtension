@@ -28,3 +28,6 @@ Thats it! You can now test your setup with e.g. this python script:
 
         print(r.text)
 ```
+
+**You need to change the filepath and the url to you own values!**
+Documentation will be available at the server base url.
