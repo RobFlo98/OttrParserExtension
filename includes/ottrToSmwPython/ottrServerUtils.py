@@ -4,9 +4,12 @@ import hashlib
 import base64
 import requests
 import urllib
+from stOttrWikiTranslater import parse_stottr_string
+import logging
+
 OTTR_EXAMPLE = """@prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix ax: <http://tpl.ottr.xyz/owl/axiom/0.1/> .
-@prefix ex: <http:example.com/ns#>
+@prefix ex: <http:example.com/ns#> .
 
 ex:NamedPizzaTemplate[owl:Class ?pizza, ? owl:NamedIndividual ?country, NEList<ottr:IRI> ?toppings, ?test] :: {
   ax:SubClassOf(?pizza, ex:NamedPizza),
@@ -22,7 +25,7 @@ ex:NamedPizzaTemplate(ex:Margherita, ex:Italy, (ex:Mozzarella, ex:Tomato)) .
 
 OTTR_EXAMPLE_TEMPLATE = """@prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix ax: <http://tpl.ottr.xyz/owl/axiom/0.1/> .
-@prefix ex: <http:example.com/ns#>
+@prefix ex: <http:example.com/ns#> .
 
 ex:NamedPizzaTemplate[owl:Class ?pizza, ? owl:NamedIndividual ?country, NEList<ottr:IRI> ?toppings, ?test] :: {
   ax:SubClassOf(?pizza, ex:NamedPizza),
@@ -33,21 +36,42 @@ ex:NamedPizzaTemplate[owl:Class ?pizza, ? owl:NamedIndividual ?country, NEList<o
   cross | ax:SubObjectSomeValuesFrom(?pizza, ex:hasTopping, ++?toppings)
 } .
 
-ex:NamedPizzaTemplate(ex:Margherita, ex:Italy, (ex:Mozzarella, ex:Tomato)) .
 """
+
+OTTR_EXAMPLE_INSTANCE = """@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix ax: <http://tpl.ottr.xyz/owl/axiom/0.1/> .
+@prefix ex: <http:example.com/ns#> .
+
+ex:NamedPizzaTemplate(ex:Margherita, ex:Italy, (ex:Mozzarella, ex:Tomato)) .
+
+"""
+
+
+OTTR_EXAMPLE_PREFIXES = """@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix ax: <http://tpl.ottr.xyz/owl/axiom/0.1/> .
+@prefix ex: <http:example.com/ns#> .
+"""
+
+
+OTTR_PREFIX_PAGENAME = 'Ottr:OttrPrefixes'
 
 
 def _clean_comments(ottr_thing):
     lines = ottr_thing.split('\n')
     # remove comments before deciding
+    remove_ix = []
+
     for i in range(len(lines)):
         if lines[i] != '' and lines[i][0] == '#':
-            lines.pop[i]
+            remove_ix.append(i)
         elif '#' in lines[i]:
             lines[i] = lines[i].split('#')[0]
 
-    # rejoin
 
+    for i in remove_ix:
+        lines.pop(i)
+
+    # rejoin
     text = '\n'.join(lines)
     return text
 
@@ -63,12 +87,12 @@ def is_template(ottr_thing):
 
 def get_template_name_from_template_string(template_string):
     template_string = _clean_comments(template_string)
-    return template_string.split('[')[0]
+    return template_string.split('[')[0].strip()
 
 
 def get_template_name_from_instance_string(instance_string):
     instance_string = _clean_comments(instance_string)
-    return instance_string.split('(')[0]
+    return instance_string.split('(')[0].strip()
 
 
 def hash_instance(string, length=10):
@@ -81,17 +105,19 @@ def hash_instance(string, length=10):
     return hash.decode('utf8')
 
 
+def get_page_texts(titles,session,url):
+    S = session
+    URL=url
+
+    PARAMS_GET= {'action':'query','prop':'revisions','titles':'|'.join(titles),'format':'json','rvprop':'content'}
+    R = S.get(url=URL,params=PARAMS_GET)
+    DATA =R.json()
+
+    return DATA
 
 
-
-def edit_or_create_page(title, text,mediawiki_url,bot_user_name,bot_user_password):
-
-
-    S = requests.Session()
-
-    # use urlparse or similar here!
-    urllib.parse.urljoin(mediawiki_url,'api.php')
-    URL = f"{mediawiki_url}/api.php"
+def wikiapi_login(Session, URL, bot_user_name, bot_user_password):
+    S = Session
 
     # Step 1: GET request to fetch login token
     PARAMS_0 = {
@@ -118,7 +144,6 @@ def edit_or_create_page(title, text,mediawiki_url,bot_user_name,bot_user_passwor
     }
 
     R = S.post(URL, data=PARAMS_1)
-    print(R.json())
 
     # Step 3: GET request to fetch CSRF token
     PARAMS_2 = {
@@ -129,21 +154,107 @@ def edit_or_create_page(title, text,mediawiki_url,bot_user_name,bot_user_passwor
 
     R = S.get(url=URL, params=PARAMS_2)
     DATA = R.json()
-    print(DATA)
     CSRF_TOKEN = DATA['query']['tokens']['csrftoken']
+
+    return CSRF_TOKEN
+
+def append_to_prefixes(prefixes, mediawiki_url, bot_user_name, bot_user_password):
+    # special case, apopend to page with <ottr> tag inside ottr tag!
+    S = requests.Session()
+
+    # use urlparse or similar here!
+    urllib.parse.urljoin(mediawiki_url, 'api.php')
+    URL = f"{mediawiki_url}/api.php"
+
+
+    CSRF_TOKEN = wikiapi_login(S, URL, bot_user_name, bot_user_password)
+
+    # Get current page text
+
+    #titles='Ottr:OttrPrefixes'
+    PARAMS_GET= {'action':'query','prop':'revisions','titles':OTTR_PREFIX_PAGENAME,'format':'json','rvprop':'content'}
+
+    R = S.get(url=URL,params=PARAMS_GET)
+    DATA =R.json()
+
+
+    wikitext = DATA['query']['pages'][list(DATA['query']['pages'].keys())[0]]['revisions'][0]['*']
+    old_prefixes, _ = parse_stottr_string(wikitext)
+    # combine lists and strip all whitespaces to single ' ' per line and then remove duplicates
+
+    old_prefixes.extend(prefixes)
+    prefixes = set([" ".join(foo.split()) for foo in old_prefixes])
+
 
 
     # Step 4: POST request to edit a page
+
+    new_text = "Put here all your prefixes used in ottr templates.\n<ottr>\n{0}\n</ottr>".format('\n'.join(prefixes))
+
     PARAMS_3 = {
         "action": "edit",
-        "title": title,
+        "title": OTTR_PREFIX_PAGENAME,
         "token": CSRF_TOKEN,
         "format": "json",
-        "text": text
+        "text": new_text
     }
 
     R = S.post(URL, data=PARAMS_3)
     DATA = R.json()
-    print(DATA)
+    logging.info(DATA)
+
+    return dict(DATA)
 
 
+def edit_or_create_page(titles, texts, mediawiki_url, bot_user_name, bot_user_password, append=False, create_only=False):
+    # TODO ERROR HANDLING
+    # TODO BATCH PROCESSING ...
+
+    S = requests.Session()
+
+    # use urlparse or similar here!
+    #URL  = urllib.parse.urljoin(mediawiki_url, 'api.php')
+    #print(URL)
+    URL = f"{mediawiki_url}/api.php"
+
+
+    CSRF_TOKEN = wikiapi_login(S, URL, bot_user_name, bot_user_password)
+
+    datas = []
+    for title, text in zip(titles, texts):
+        # Step 4: POST request to edit a page
+        if not append:
+            PARAMS_3 = {
+                "action": "edit",
+                "title": title,
+                "token": CSRF_TOKEN,
+                "format": "json",
+                "text": text
+            }
+        else:
+            PARAMS_3 = {
+                "action": "edit",
+                "title": title,
+                "token": CSRF_TOKEN,
+                "format": "json",
+                "appendtext": text
+            }
+
+        if create_only:
+            PARAMS_3 = {
+                "action": "edit",
+                "title": title,
+                "token": CSRF_TOKEN,
+                "format": "json",
+                "text": text,
+                'createonly': True
+            }
+
+        R = S.post(URL, data=PARAMS_3)
+        DATA = R.json()
+
+
+        logging.info(DATA)
+
+        datas.append(dict(DATA))
+    return datas
