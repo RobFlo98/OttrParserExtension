@@ -4,7 +4,7 @@ from includes.ottrToSmwPython.OTTRParser import OTTRParser
 from includes.ottrToSmwPython.Utils import get_text, DELIMITERS, get_min_max_size, get_prefix_special_page_name, \
     VarNames, get_input_type_of_ottr_type
 from includes.ottrToSmwPython.stOTTR.stOTTRParser import stOTTRParser
-from includes.ottrToSmwPython.Settings import form_typehint_mapping, form_listhint
+from includes.ottrToSmwPython.Settings import form_typehint_mapping, form_listhint, ottr_template_namespaces
 from typing import List
 import re
 #from includes.ottrToSmwPython.SMWGenerator import  debug_print
@@ -416,12 +416,44 @@ class Instance:
             self.list_expander = get_text(ctx.ListExpander())
         self.additional_args = ""
 
+
+
+
+
     def get_smw_repr(self, smw_context: SMWContext = None):
+
+        def template_exists_wrap(template_name, print_ex, print_nex):
+
+            """
+            prints print_ex if template exists in ottr_template_namespaces, and print_nex otherwise
+
+            """
+            # expression that prints 'yes' for each page with Prefix:TemplateName in mediawiki and nothing otherwise
+            prefixed_exists = ''.join(["{{#ifeq:{{Exists|%s:%s}}|1|yes|}}" % (prefix, self.template_name) for prefix in
+                                       ottr_template_namespaces])
+
+            # prints print_ex if one or more pages exists in wiki and print_nex otherwise
+            if_ex = "{{#if:%s|%s|%s}}" % (prefixed_exists, print_ex, print_nex)
+
+            return if_ex
         if self.correct_variable_usage():
             if self.correct_list_expand_usage():
                 smw = self.define_arrays(smw_context)
                 if self.list_expander is None:
-                    smw += "{{%s%s}}" % (self.template_name, self.argument_list_smw_repr(smw_context))
+
+                    # Call subtemplates in wiki with arguments
+                    template_call = "{{%s%s}}" % (self.template_name, self.argument_list_smw_repr(smw_context))
+
+                    warning = "{{ottr:ErrorMsg|Template %s called but not present in wiki!}}" % self.template_name
+
+                    template_call_with_warning = "%s %s" % (template_call,warning)
+
+                    # wrap in exists call, such that missing templates are reported.
+                    exists_wrap = template_exists_wrap(self.template_name,template_call, template_call_with_warning)
+
+
+                    smw += exists_wrap
+                   # print('<pre>' + smw + '</pre>')
                     pass
                 else:
                     smw += self.list_expand_smw_repr(smw_context)
@@ -804,11 +836,13 @@ class Template:
     def get_smw_repr(self, smw_context: SMWContext = None):
         if type(self.pattern_list) == list:
             smw = self.signature.get_smw_repr(smw_context)
+
             for instance in self.pattern_list:
                 if not instance.correct_list_expand_usage():
                     return instance.LIST_EXPAND_ERROR
                 smw %= (instance.get_smw_repr(smw_context) + "%s")
                 smw_context.call_occurrence_position += 1
+
             return smw % ""
         elif self.pattern_list == "BASE":
             # base templates always produce sub object containing the triple

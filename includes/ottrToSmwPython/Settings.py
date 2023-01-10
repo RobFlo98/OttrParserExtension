@@ -11,4 +11,3 @@ form_typehint_mapping = {'xsd:date': "--date-format = (YYYY-MM-DD)"}
 # typehint for lists. printed in forms
 form_listhint = "--elements in ( .. ) separated by ','"
 
-print(','.join(ottr_template_namespaces))

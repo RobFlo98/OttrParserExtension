@@ -44,6 +44,6 @@ class OttrParserExtension {
 		$display_ottr = '<noinclude><!--{{safesubst:#ottrFunction:'.str_replace(array("\r","\n"), '', $input).'}}-->{{#ifexpr: {{ottr:DisplayOttr}}|' . "'''OTTR-Definition:'''<br/><pre>" . htmlspecialchars($input) . '</pre>}}</noinclude>';
 		$display_wikicode = '<noinclude>{{#ifexpr: {{ottr:DisplayCode}}|' . "'''Wikicode:'''<br/>" . '<pre>'. htmlspecialchars($code) . '</pre>' . '}}</noinclude>';
 		$output = $display_ottr . $code . $display_wikicode;
-		return $output;
+		return $output . "This is RUN!";
 	}
 }

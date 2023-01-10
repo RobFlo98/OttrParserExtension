@@ -93,7 +93,7 @@ def mediawiki_build_template_with_args(template):
 
     # print('list_after',par_arg_list)
 
-    s = f"{template.signature.template_name} [\n"
+    s = f"{template.signature.template_name} (\n"
 
     s += f"<table>"
     parlens = [len(par) for (par, _) in par_arg_list]
@@ -105,11 +105,11 @@ def mediawiki_build_template_with_args(template):
         s += "</td><td>=</td>"
 
         s += "<td>"
-        s += f"{arg}\n"
+        s += f"{arg},\n"
         s += "</td></tr>"
 
     s += "</table>"
-    s += "]\n"
+    s += ")\n"
     # s += "</code>"
 
     s = mediawiki_replace_newline_br(s)
@@ -126,13 +126,23 @@ def mediawiki_replace_newline_br(s):
     return s.replace("\n", "<br>")
 
 
-def mediawiki_generate_template_query():
+def mediawiki_generate_template_in_correct_namespace_query():
     list_of_options = ["{{#ifeq:{{#pos:{{FULLPAGENAME}}|%s:}}|0|1|0}}" % x.capitalize() for x in
                        ottr_template_namespaces]
 
     options = reduce(lambda x, y: x + " or " + y, list_of_options, "0")
 
     return options
+
+
+def mediawiki_generate_template_correct_name(name, warning):
+    # gets a one if one namespace:name is equal to FULLPAGENAME and empty string otherwise
+    possibilities = ''.join(
+        ["{{#ifeq:%s:%s|{{FULLPAGENAME}}|1|}}" % (namespace.capitalize(), name) for namespace in ottr_template_namespaces])
+
+    # Prints warning if one of the paganemaes matches
+    if_ex = "{{#if:%s||%s}}" % (possibilities,warning)
+    return if_ex
 
 
 def save_arg_values(instances):
@@ -265,14 +275,14 @@ class SMWGenerator:
     def produce_templates(self, produce_form):
         form_string = ""
 
-
         def wrap_comments():
             if self.comments:
-                comms = [f" {x.strip()}" for x in self.comments]
+                comms = [f"{x.strip()}" for x in self.comments]
                 comms = "\n".join(comms)
-                return f"\n{comms}"
+                return f"\n<pre>{comms}</pre>"
             else:
                 return ""
+
         if produce_form:
             # all forms are multi instances with multi templates (brought about by more than one template signature in the input)
             form_string = textwrap.dedent("""\
@@ -330,24 +340,20 @@ class SMWGenerator:
                 # a check if the template is in the template valuespace
                 # and a check if the template name is the same as the page name (without the 'Template:'-/-->Prefix) and throws an error otherwise
 
+                wrong_name_warning = "{{ottr:ErrorMsg|Template name and Page name should be the same:<b> %s </b>(Template name) , <b>{{FULLPAGENAME}}</b> (Pagename)|code=-1|type=Warning}}" % upper_template_name
 
-
-                warning_string = "{{#ifeq: {{FULLPAGENAME}}| %s| |{{ottr:ErrorMsg|Template name and Page name should be the same:<b> %s </b>(Template name) , <b>{{FULLPAGENAME}}</b> (Pagename)|code=-1|type=Warning}} }}" \
-                           " </noinclude>" % (upper_template_name,upper_template_name)
-
-
-
-
+                wrong_name_warning_string = mediawiki_generate_template_correct_name(upper_template_name,wrong_name_warning)  + " </noinclude>"
 
                 return (("<noinclude>"
 
-                         "{{#ifexpr: %s ||%s}}" % (mediawiki_generate_template_query(), wrong_namespace_warning_text)
+                         "{{#ifexpr: %s ||%s}}" % (
+                         mediawiki_generate_template_in_correct_namespace_query(), wrong_namespace_warning_text)
 
-                         + warning_string)
+                         + wrong_name_warning_string)
                         + (
                                 "<noinclude>{{#ifexpr: {{ottr:DisplayFormHelp}}|%s|}}</noinclude>" % template.get_form_help_str(
                             self.comments))
-                        +  wrap_comments()
+                        + mediawiki_wrap_if_calldepht(wrap_comments(), 0)
                         + "<includeonly>"
                         + template.get_smw_repr(smw_context) + "</includeonly><noinclude>"
                         + f"\nExisting Instances: {{{{#ask:\
